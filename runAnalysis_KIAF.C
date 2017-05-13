@@ -6,12 +6,12 @@ void runAnalysis_KIAF(const char *dataset = "test1.list")
     LoadLibraries();
     LoadMacros();
     // create the analysis manager
-    AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisMyTask");
+    AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisXic");
     AliESDInputHandler *esdH =  AddESDHandler();
     mgr->SetInputEventHandler(esdH);
 
     // create an instance of your analysis task
-    AliAnalysisTaskMyTask *task = AddMyTask();
+    AliAnalysisTaskXic *task = AddXic();
     mgr->PrintStatus();
     mgr->SetUseProgressBar(1, 25);
 
@@ -44,8 +44,8 @@ void LoadLibraries()
 }
 void LoadMacros()
 {
-    gROOT->LoadMacro("AliAnalysisTaskMyTask.cxx++g");
-    gROOT->LoadMacro("AddMyTask.C");
+    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
+    gROOT->LoadMacro("AddXic.C");
 
     gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/train/AddESDHandler.C");
     gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");

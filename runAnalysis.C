@@ -26,9 +26,10 @@ void runAnalysis()
     TString ppass = "pass3";
 
     Int_t runNmin=0;
-    Int_t runNmax=22;
-    Int_t runList[30]={244628, 244627, 244626, 244542, 244540, 244531, 244484, 244483, 244482, 244481, 244480, 244456, 244453, 244421, 244416, 244377, 244364, 244359, 244355, 244351, 244343, 244340};
-    //Int_t runList[1]={244628}; //for test
+    //Int_t runNmax=22;
+    Int_t runNmax=1;
+    //Int_t runList[30]={244628, 244627, 244626, 244542, 244540, 244531, 244484, 244483, 244482, 244481, 244480, 244456, 244453, 244421, 244416, 244377, 244364, 244359, 244355, 244351, 244343, 244340};
+    Int_t runList[1]={244628}; //for test
 
     // create the analysis manager
     AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskExample");
@@ -38,11 +39,11 @@ void runAnalysis()
     mgr->SetInputEventHandler(esdH);
 
     // compile the class (locally)
-    gROOT->LoadMacro("AliAnalysisTaskMyTask.cxx++g");
+    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
     // load the addtask macro
-    gROOT->LoadMacro("AddMyTask.C");
+    gROOT->LoadMacro("AddXic.C");
     // create an instance of your analysis task
-    AliAnalysisTaskMyTask *task = AddMyTask();
+    AliAnalysisTaskXic *task = AddXic();
 
     if(!mgr->InitAnalysis()) return;
     //mgr->SetDebugLevel(2);
@@ -79,8 +80,8 @@ void runAnalysis()
         plugin->SetAliPhysicsVersion("v5-06-15-01");
        
         // make sure your source files get copied to grid
-        plugin->SetAdditionalLibs("AliAnalysisTaskMyTask.cxx AliAnalysisTaskMyTask.h");
-        plugin->SetAnalysisSource("AliAnalysisTaskMyTask.cxx");
+        plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
+        plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
    
         // select the input data
         plugin->SetGridDataDir("/alice/data/2015/LHC15n");
@@ -95,10 +96,10 @@ void runAnalysis()
         // number of files per subjob
         plugin->SetSplitMaxInputFileNumber(10);
         
-        plugin->SetExecutable("myTask.sh");
+        plugin->SetExecutable("Xic.sh");
         // specify how many seconds your job may take
         plugin->SetTTL(40000);
-        plugin->SetJDLName("myTask.jdl");
+        plugin->SetJDLName("Xic.jdl");
 
         plugin->SetOutputToRunNo(kTRUE);
         plugin->SetKeepLogs(kTRUE);
@@ -107,7 +108,7 @@ void runAnalysis()
 
         // define the output folders
         plugin->SetGridWorkingDir("Xi_c_Test");
-        plugin->SetGridOutputDir("20170508_01");
+        plugin->SetGridOutputDir("20170513_01");
 
         // connect the alien plugin to the manager
         mgr->SetGridHandler(plugin);
