@@ -112,7 +112,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fMultDist->GetXaxis()->SetTitle("Multiplicity");
     fOutputList->Add(fMultDist);
 
-    TH2F *fArmPod = new TH2F("fArmPod", "Armenteros-Podolski Plot", 100, 0, 0.25, 200, -1, 1);
+    TH2F *fArmPod = new TH2F("fArmPod", "Armenteros-Podolski Plot", 200,-1, 1, 100, 0, 0.25);
     fOutputList->Add(fArmPod);
 
 
@@ -374,6 +374,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     Double_t fMinV0Pt = 0.15;  Double_t fMaxV0Pt = 1.E10;    Double_t lV0Radius = 0, lPt = 0;
     Double_t fQt = 0;       Double_t falpha = 0;
+    Double_t thetaV0pos, thetaV0neg;
+    TVector3 momentumVectorPositiveKF, momentumVectorNegativeKF, vecV0;
 
     Double_t V0momK0ShortDaughterN[3] = {.0, .0, .0};
     Double_t V0momK0ShortDaughterP[3] = {.0, .0, .0};
@@ -410,7 +412,18 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             continue;
         }
         // Armenteros-Podolski Plot
-	//fQt = pTrack->Get
+	// ref. PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov
+	v0i->GetPPxPyPz(momentumVectorPositiveKF[0],momentumVectorPositiveKF[1],momentumVectorPositiveKF[2]);
+	v0i->GetNPxPyPz(momentumVectorNegativeKF[0],momentumVectorNegativeKF[1],momentumVectorNegativeKF[2]);
+	v0i->GetPxPyPz(vecV0[0],vecV0[1],vecV0[2]);
+
+	thetaV0pos=TMath::ACos(( momentumVectorPositiveKF* vecV0)/(momentumVectorPositiveKF.Mag() * vecV0.Mag()));
+	thetaV0neg=TMath::ACos(( momentumVectorNegativeKF* vecV0)/(momentumVectorNegativeKF.Mag() * vecV0.Mag()));
+
+	falpha =((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)-(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg))/((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)+(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg)) ;
+	fQt = momentumVectorPositiveKF.Mag()*TMath::Sin(thetaV0pos);
+	
+	((TH2F*)fOutputList->FindObject("fArmPod"))->Fill(falpha,fQt);
 
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
