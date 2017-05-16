@@ -112,6 +112,10 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fMultDist->GetXaxis()->SetTitle("Multiplicity");
     fOutputList->Add(fMultDist);
 
+    TH2F *fArmPod = new TH2F("fArmPod", "Armenteros-Podolski Plot", 100, 0, 0.25, 200, -1, 1);
+    fOutputList->Add(fArmPod);
+
+
     TH1F *fInvLambdaCheck = new TH1F("fInvLambdaCheck", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
     fInvLambdaCheck->GetXaxis()->SetTitle("fInvLambdaCheck");
     fOutputList->Add(fInvLambdaCheck);
@@ -231,8 +235,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fTrackCut->SetRequireTPCRefit(kTRUE);     //3.
     fTrackCut->SetMaxChi2PerClusterTPC(4);    //4.
     fTrackCut->SetMinNClustersTPC(70);        //5. TPC nclus will be changed in order to performed systematic.
-    fTrackCut->SetEtaRange(-0.8, +0.8);       //6.
-    fTrackCut->SetMaxDCAToVertexZ(2);           //7. DCAz cut
+    //fTrackCut->SetEtaRange(-0.8, +0.8);       //6.
+    //fTrackCut->SetMaxDCAToVertexZ(2);           //7. DCAz cut
     //fTrackCut->SetMaxDCAToVertexXYPtDep("1.");  //8. DCAr cut
 
 
@@ -369,7 +373,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     static Double_t piMass = 0.13957;       static Double_t protonMass = 0.93827;
 
     Double_t fMinV0Pt = 0.15;  Double_t fMaxV0Pt = 1.E10;    Double_t lV0Radius = 0, lPt = 0;
-    //Double_t DcaDau = 0;       Double_t V0CosPoin = 0;
+    Double_t fQt = 0;       Double_t falpha = 0;
 
     Double_t V0momK0ShortDaughterN[3] = {.0, .0, .0};
     Double_t V0momK0ShortDaughterP[3] = {.0, .0, .0};
@@ -405,10 +409,15 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
+        // Armenteros-Podolski Plot
+	//fQt = pTrack->Get
+
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
         }
-        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
+        // Pt range for tracks
+	// 
+	// TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
         //if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         //if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         //if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
