@@ -226,7 +226,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     // Example of GetStandardITSTPCTrackCuts
     fTrackCut = new AliESDtrackCuts();
-    fTrackCut->SetPtRange(.15, 1000); // min. pT cut //1.
+    fTrackCut->SetPtRange(.15, 100000000); // min. pT cut //1.
     fTrackCut->SetAcceptKinkDaughters(kFALSE); //2.
     fTrackCut->SetRequireTPCRefit(kTRUE);     //3.
     fTrackCut->SetMaxChi2PerClusterTPC(4);    //4.
@@ -396,7 +396,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         lPt = v0i->Pt();
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         if (v0i->GetDcaV0Daughters() > 1.5) continue;
-        cout << "Cos Pointing Angle: " << v0i->GetV0CosineOfPointingAngle() << endl;
         if (v0i->GetV0CosineOfPointingAngle() > 0.97) continue;
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
@@ -410,13 +409,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             continue;
         }
         // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+        //if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        //if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        //if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //GetKinkIndex condition
-        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+        //if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
         //Findable clusters > 0 condition
-        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+        //if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
         if(!fTrackCut->AcceptTrack(pTrack)) continue;
 	if(!fTrackCut->AcceptTrack(nTrack)) continue;
 	//// -------------------- ////
@@ -453,13 +452,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
                 continue;
             }
             // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-            if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-            if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-            if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+            //if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+            //if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+            //if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
             //GetKinkIndex condition
-            if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+            //if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
             //Findable clusters > 0 condition
-            if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+            //if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
             if(!fTrackCut->AcceptTrack(pTrack)) continue;
 	    if(!fTrackCut->AcceptTrack(nTrack)) continue;
 	    //// -------------------- ////
