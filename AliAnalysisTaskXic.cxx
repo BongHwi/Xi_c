@@ -1,7 +1,7 @@
 /**************************************************************************
  * Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  *                                                                        *
- * Author: The ALICE Off-line Project.                                    *
+ * Author: Bong-Hwi Lim (bong-hwi.lim@cern.ch)                                    *
  * Contributors are mentioned in the code where appropriate.              *
  *                                                                        *
  * Permission to use, copy, modify and distribute this software and its   *
@@ -115,6 +115,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH2F *fArmPod = new TH2F("fArmPod", "Armenteros-Podolski Plot", 200,-1, 1, 100, 0, 0.25);
     fOutputList->Add(fArmPod);
 
+    TH1F *fInvLambda_before = new TH1F("fInvLambda_before", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
+    fInvLambda_before->GetXaxis()->SetTitle("fInvLambda_before");
+    fOutputList->Add(fInvLambda_before);
 
     TH1F *fInvLambdaCheck = new TH1F("fInvLambdaCheck", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
     fInvLambdaCheck->GetXaxis()->SetTitle("fInvLambdaCheck");
@@ -162,6 +165,14 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *hInvMass = new TH1F("hInvMass", "Invariant mass distribution", 1000, 2.0, 3.0);
     fOutputList->Add(hInvMass);
 
+    TH2F *hTPCPID_K0s = new TH2F("hTPCPID_K0s","PID via TPC",500,0,20,500,0,200);
+    fOutputList->Add(hTPCPID_K0s);
+    TH2F *hTPCPID_K0s_after = new TH2F("hTPCPID_K0s_after","PID via TPC",500,0,20,500,0,200);
+    fOutputList->Add(hTPCPID_K0s_after);
+    TH2F *hTPCPID_lam = new TH2F("hTPCPID_lam","PID via TPC",500,0,20,500,0,200);
+    fOutputList->Add(hTPCPID_lam);
+    TH2F *hTPCPID_lam_after = new TH2F("hTPCPID_lam_after","PID via TPC",500,0,20,500,0,200);
+    fOutputList->Add(hTPCPID_lam_after);
 
     //------------------------------------------------
     // Particle Identification Setup
@@ -262,110 +273,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     //------------------------------------------------
     if (fESD->IsPileupFromSPD()) return; // Reject Pile-up events
 
-    /*
-        double fx = -100;
-        double fy = -100;
-        double fz = -100;
-
-
-        int fTPCNcls = -100;
-        double fDCA = -100; // sqrt (xx+yy+zz)
-        double fDCAr = -100; // sqrt(xx+yy)
-        double fDCAZ = -100; // z infor
-
-        double  fTrueMassPr = .93827, fTrueMassPi = .13957;
-        double  fMass = 0.;
-
-        //------------------------------------------------
-        //Step 5: Loops on tracks
-        //------------------------------------------------
-            Int_t iTracks(fESD->GetNumberOfTracks());           // see how many tracks there are in the event
-            for(Int_t i(0); i < iTracks; i++) {                 // loop ove rall these tracks
-                AliESDtrack* track = fESD->GetTrack(i);         // get a track (type AliESDTrack) from the event
-                if(!track) continue;                            // if we failed, skip this track
-                fHistPt->Fill(track->Pt());                     // plot the pt value of the track in a histogram
-
-                if(!fTrackCut->AcceptTrack(track)) continue;
-
-
-                ((TH1F*)fOutputList->FindObject("fPtDist"))->Fill(track->Pt());
-                ((TH1F*)fOutputList->FindObject("fPhiDist"))->Fill(track->Phi());
-                ((TH1F*)fOutputList->FindObject("fEtaDist"))->Fill(track->Eta());
-
-
-
-                fTPCNcls = track->GetTPCNcls();
-                if(fDCAZ > 2.)continue;
-                // fDCAr --> Homework
-                if(fTPCNcls < 70.) continue;
-
-                //Home work
-                fx = track->GetX();
-                fy = track->GetY();
-                fz = track->GetZ();
-
-                fDCAr = sqrt((fx-primaryVtx[0])*(fx-primaryVtx[0])+(fy-primaryVtx[1])*(fy-primaryVtx[1]));
-                fDCAZ = fabs(fz-primaryVtx[2]);
-
-                ((TH1F*)fOutputList->FindObject("fDCArDist"))->Fill(fDCAr);
-
-
-
-
-                ((TH1F*)fOutputList->FindObject("fNTPCcls"))->Fill(fTPCNcls);
-                ((TH1F*)fOutputList->FindObject("fPtDistTight"))->Fill(track->Pt());
-
-
-                //------------------------------------------------
-                //Step 6: Particle IDentification
-                //------------------------------------------------
-
-                Float_t fTPCPIDmom = track->GetTPCmomentum();
-                Float_t sigTPC = track->GetTPCsignal();
-                Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
-                Float_t nsigk= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kKaon));
-                Float_t nsigpr= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kProton));
-
-                ((TH2F*)fOutputList->FindObject("hTPCPID"))->Fill(fTPCPIDmom,sigTPC);
-
-
-                Double_t tDecayVertexV0[3];
-                track->GetXYZ(tDecayVertexV0);
-
-
-                Double_t tV0mom[3];
-                track->GetPxPyPz( tV0mom);
-
-                Int_t fCharge = -100.;
-                fCharge = track->Charge();
-
-                Double_t pV0mom[3];
-                Double_t nV0mom[3];
-
-                    if(nsigpi<3.)track->GetPxPyPz(nV0mom);
-                    if(nsigpr<3.)track->GetPxPyPz(pV0mom);
-                    if((nV0mom[0]*nV0mom[0] + nV0mom[1]*nV0mom[1] + nV0mom[2]*nV0mom[2])<=0) continue;
-                    if((pV0mom[0]*pV0mom[0] + pV0mom[1]*pV0mom[1] + pV0mom[2]*pV0mom[2])<=0) continue;
-
-                    Double_t ep=TMath::Sqrt(fTrueMassPr*fTrueMassPr + pV0mom[0]*pV0mom[0] + pV0mom[1]*pV0mom[1] + pV0mom[2]*pV0mom[2]);
-
-                    Double_t en=TMath::Sqrt(fTrueMassPi*fTrueMassPi + nV0mom[0]*nV0mom[0] + nV0mom[1]*nV0mom[1] + nV0mom[2]*nV0mom[2]);
-
-                    //cout<< "en === " << en <<" ep == " << ep <<endl;
-
-                    // Double_t pl=TMath::Sqrt(tV0mom[0]*tV0mom[0] + tV0mom[1]*tV0mom[1] + tV0mom[2]*tV0mom[2]);
-               // Double_t pl=TMath::Sqrt((nV0mom[0]+pV0mom[0])*(nV0mom[0]+pV0mom[0]) + (nV0mom[1]+pV0mom[1])*(nV0mom[1]+pV0mom[1]) + (nV0mom[2]+pV0mom[2])*(nV0mom[2]+pV0mom[2]));
-
-
-                Double_t angle=nV0mom[0]*pV0mom[0]+nV0mom[1]*pV0mom[1]+nV0mom[2]*pV0mom[2];
-                fMass = fTrueMassPr*fTrueMassPr+fTrueMassPi*fTrueMassPi+2.*en*ep-2.*angle;
-                if(fMass<=0) continue;
-                fMass=sqrt(fMass);
-                //cout<< " Lambda Invariant mass " << fMass <<endl;
-
-                ((TH2F*)fOutputList->FindObject("fInvLambdaTrack"))->Fill(fMass);
-                }
-        */ //No Track use for this analysis
     double lInvMassLambda = 0.;
     double lInvMassK0Short = 0.0;
 
@@ -398,92 +305,100 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
 
-        //// ---- Default Cut ---- ////
         lPt = v0i->Pt();
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-        if (v0i->GetDcaV0Daughters() > 1.5) continue;
-        if (v0i->GetV0CosineOfPointingAngle() > 0.97) continue;
+
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
+
         AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
         AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
         if (!pTrack || !nTrack) {
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
-        // Armenteros-Podolski Plot
-	// ref. PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov
-	v0i->GetPPxPyPz(momentumVectorPositiveKF[0],momentumVectorPositiveKF[1],momentumVectorPositiveKF[2]);
-	v0i->GetNPxPyPz(momentumVectorNegativeKF[0],momentumVectorNegativeKF[1],momentumVectorNegativeKF[2]);
-	v0i->GetPxPyPz(vecV0[0],vecV0[1],vecV0[2]);
-
-	thetaV0pos=TMath::ACos(( momentumVectorPositiveKF* vecV0)/(momentumVectorPositiveKF.Mag() * vecV0.Mag()));
-	thetaV0neg=TMath::ACos(( momentumVectorNegativeKF* vecV0)/(momentumVectorNegativeKF.Mag() * vecV0.Mag()));
-
-	falpha =((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)-(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg))/((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)+(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg)) ;
-	fQt = momentumVectorPositiveKF.Mag()*TMath::Sin(thetaV0pos);
-	
-	((TH2F*)fOutputList->FindObject("fArmPod"))->Fill(falpha,fQt);
 
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
         }
-        // Pt range for tracks
-	// 
-	// TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
+
+        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
         if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+
         //GetKinkIndex condition
         if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        //if(!fTrackCut->AcceptTrack(pTrack)) continue;
-	//if(!fTrackCut->AcceptTrack(nTrack)) continue;
-	//// -------------------- ////
 
+	Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
+        Float_t sigTPC = pTrack->GetTPCsignal();
+        Float_t nsigpip= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
+	Float_t nsigpin= fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kPion));
+
+	((TH2F*)fOutputList->FindObject("hTPCPID_K0s"))->Fill(fTPCPIDmom,sigTPC);
+	if (nsigpip > 3.0 && nsigpin > 3.0 ) continue;
+	((TH2F*)fOutputList->FindObject("hTPCPID_K0s_after"))->Fill(fTPCPIDmom,sigTPC);
 
         // find new v0 for K0Short
         v0i->ChangeMassHypothesis(310); //kK0Short
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         lInvMassK0Short = v0i->GetEffMass();
         ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0Short); // Before Cut
-        if (lInvMassK0Short > k0Mass + 0.008 || lInvMassK0Short < k0Mass - 0.008) continue; // Mass window
+	v0i->ChangeMassHypothesis(3122); //kLambda0
+        lInvMassLambda = v0i->GetEffMass();
+       	((TH1F*)fOutputList->FindObject("fInvLambda_before"))->Fill(lInvMassLambda); // Before Cut
+
+	if (lInvMassK0Short > k0Mass + 0.008 || lInvMassK0Short < k0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0Short); // After Cut
 
         for (Int_t jV0 = iV0; jV0 < nv0s; jV0++)
         {   // This is the begining of the V0 loop for second V0(Lambda)
-            if (iV0 == jV0) continue;
             AliESDv0 *v0j = ((AliESDEvent*)fESD)->GetV0(jV0);
-
-            //// ---- Default Cut ---- ////
-            if (!v0j) continue;
+              if (!v0j) continue;
+    
             lPt = v0j->Pt();
             if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-            if (v0j->GetDcaV0Daughters() > 1.5) continue;
-            if (v0j->GetV0CosineOfPointingAngle() > 0.97) continue;
+    
             UInt_t lKeyPos = (UInt_t)TMath::Abs(v0j->GetPindex());
             UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0j->GetNindex());
+    
+    
             AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
             AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
             if (!pTrack || !nTrack) {
                 Printf("ERROR: Could not retreive one of the daughter track");
                 continue;
             }
+    
             if ( pTrack->GetSign() == nTrack->GetSign()) {
                 continue;
             }
+    
             // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
             if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
             if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+    
             if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+    
             //GetKinkIndex condition
             if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+    
             //Findable clusters > 0 condition
             if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-            //if(!fTrackCut->AcceptTrack(pTrack)) continue;
-	    //if(!fTrackCut->AcceptTrack(nTrack)) continue;
-	    //// -------------------- ////
+
+	    Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
+            Float_t sigTPC = pTrack->GetTPCsignal();
+            //Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
+            //Float_t nsigk= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kKaon));
+            Float_t nsigprP = fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kProton));
+	    Float_t nsigprN = fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kProton));
+            ((TH2F*)fOutputList->FindObject("hTPCPID_lam"))->Fill(fTPCPIDmom,sigTPC);
+            if (nsigprP > 3.0 || nsigprN > 3.0) continue;
+            ((TH2F*)fOutputList->FindObject("hTPCPID_lam_after"))->Fill(fTPCPIDmom,sigTPC);
 
             // find new v0 for Lambda0
             v0j->ChangeMassHypothesis(3122); //kLambda0
@@ -511,49 +426,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             ((TH1F*)fOutputList->FindObject("hInvMass"))->Fill(fMass); // Cumulated
         }
     }
-
-    for (Int_t iV0 = 0; iV0 < nv0s; iV0++)
-    {   // This is the begining of the V0 loop for first V0(K0Short)
-        AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
-        if (!v0i) continue;
-
-        lPt = v0i->Pt();
-        if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-
-        UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
-        UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
-
-
-        AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
-        AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
-        if (!pTrack || !nTrack) {
-            Printf("ERROR: Could not retreive one of the daughter track");
-            continue;
-        }
-
-        if ( pTrack->GetSign() == nTrack->GetSign()) {
-            continue;
-        }
-
-        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-
-        if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
-
-        //GetKinkIndex condition
-        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
-
-        //Findable clusters > 0 condition
-        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-
-        // find new v0 for K0Short
-        v0i->ChangeMassHypothesis(kLambda0);
-        lInvMassLambda = v0i->GetEffMass();
-        ((TH1F*)fOutputList->FindObject("fInvLambdaCheck"))->Fill(lInvMassLambda);
-
-    }
-
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     // the output manager which will take care of writing
 
@@ -574,3 +446,4 @@ double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t
 {
     return Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2;
 }
+
