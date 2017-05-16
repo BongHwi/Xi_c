@@ -230,7 +230,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fTrackCut->SetAcceptKinkDaughters(kFALSE); //2.
     fTrackCut->SetRequireTPCRefit(kTRUE);     //3.
     fTrackCut->SetMaxChi2PerClusterTPC(4);    //4.
-    // fTrackCut->SetMinNClustersTPC(70);        //5. TPC nclus will be changed in order to performed systematic.
+    fTrackCut->SetMinNClustersTPC(70);        //5. TPC nclus will be changed in order to performed systematic.
     fTrackCut->SetEtaRange(-0.8, +0.8);       //6.
     fTrackCut->SetMaxDCAToVertexZ(2);           //7. DCAz cut
     //fTrackCut->SetMaxDCAToVertexXYPtDep("1.");  //8. DCAr cut
@@ -417,7 +417,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        //// -------------------- ////
+        if(!fTrackCut->AcceptTrack(pTrack)) continue;
+	if(!fTrackCut->AcceptTrack(nTrack)) continue;
+	//// -------------------- ////
 
 
         // find new v0 for K0Short
@@ -458,7 +460,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
             //Findable clusters > 0 condition
             if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-            //// -------------------- ////
+            if(!fTrackCut->AcceptTrack(pTrack)) continue;
+	    if(!fTrackCut->AcceptTrack(nTrack)) continue;
+	    //// -------------------- ////
 
             // find new v0 for Lambda0
             v0j->ChangeMassHypothesis(3122); //kLambda0
