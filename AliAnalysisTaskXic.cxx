@@ -431,15 +431,15 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Pt range for tracks
 	// 
 	// TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-        //if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        //if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        //if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //GetKinkIndex condition
-        //if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
         //Findable clusters > 0 condition
-        //if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        if(!fTrackCut->AcceptTrack(pTrack)) continue;
-	if(!fTrackCut->AcceptTrack(nTrack)) continue;
+        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+        //if(!fTrackCut->AcceptTrack(pTrack)) continue;
+	//if(!fTrackCut->AcceptTrack(nTrack)) continue;
 	//// -------------------- ////
 
 
@@ -474,15 +474,15 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
                 continue;
             }
             // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-            //if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-            //if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-            //if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+            if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+            if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+            if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
             //GetKinkIndex condition
-            //if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+            if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
             //Findable clusters > 0 condition
-            //if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-            if(!fTrackCut->AcceptTrack(pTrack)) continue;
-	    if(!fTrackCut->AcceptTrack(nTrack)) continue;
+            if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+            //if(!fTrackCut->AcceptTrack(pTrack)) continue;
+	    //if(!fTrackCut->AcceptTrack(nTrack)) continue;
 	    //// -------------------- ////
 
             // find new v0 for Lambda0
