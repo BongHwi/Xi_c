@@ -53,6 +53,7 @@ double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
     fOutputList(0x0),
+    fOutputList2(0x0),
     fPIDResponse(0x0),
     fCentrality(0),
     fTrackCut(0x0),

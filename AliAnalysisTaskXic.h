@@ -22,6 +22,7 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
     private:
         AliESDEvent*            fESD;         //! input event
         TList*                  fOutputList;  //! output list
+	TList*                  fOutputList2; //! output list
         AliPIDResponse*         fPIDResponse; //! PID object
         AliCentrality*          fCentrality;  //! Centrality object
         AliESDtrackCuts        *fTrackCut;   //! ESD track cuts
