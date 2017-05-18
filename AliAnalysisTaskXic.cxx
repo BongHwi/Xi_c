@@ -40,6 +40,8 @@
 #include "AliCascadeVertexer.h"
 #include "AliCentrality.h"
 
+#include "AliKFParticle.h"
+#include "AliKFVertex.h"
 #include "AliAnalysisTaskXic.h"
 
 class AliAnalysisTaskXic;    // your analysis class
@@ -49,6 +51,7 @@ using namespace std;            // std namespace: so you can do things like 'cou
 ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
 double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
+void GetArPod(Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arpod[2]);
 
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
@@ -115,8 +118,11 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fMultDist->GetXaxis()->SetTitle("Multiplicity");
     fOutputList->Add(fMultDist);
 
-    TH2F *fArmPod = new TH2F("fArmPod", "Armenteros-Podolski Plot", 200,-1, 1, 100, 0, 0.25);
-    fOutputList->Add(fArmPod);
+    TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800,-1.0, 1.0, 100, 0, 0.25);
+    fOutputList->Add(fArmPod_kaon);
+    TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800,-1.0, 1.0, 100, 0, 0.25);
+    fOutputList->Add(fArmPod_lambda);
+
 
     TH1F *fInvLambda_before = new TH1F("fInvLambda_before", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
     fInvLambda_before->GetXaxis()->SetTitle("fInvLambda_before");
@@ -313,10 +319,28 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
         AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
-        if (!pTrack || !nTrack) {
+        const AliExternalTrackParam * paramPos = v0i->GetParamP();
+	const AliExternalTrackParam * paramNeg = v0i->GetParamN();
+
+	if (!pTrack || !nTrack) {
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
+	// Draw Armenteros-Podolanski Plot
+	// from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
+	
+	// Pion -> pi+ + pi-  ---------------
+    	AliKFParticle negKFKpim(*paramNeg,211);
+    	AliKFParticle posKFKprot(*paramPos,211);
+    	AliKFParticle kaonKF(negKFKpim,posKFKprot);
+
+	Double_t posp[3]= { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
+	Double_t negp[3]= { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
+	Double_t moth[3]= { kaonKF.GetPx(), kaonKF.GetPy(), kaonKF.GetPz() };
+	Double_t arpod[2]= {0,0};
+	GetArPod( posp, negp, moth, arpod );
+
+	((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(arpod[1],arpod[0]);
 
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
@@ -369,11 +393,35 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     
             AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
             AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
+	    const AliExternalTrackParam * paramPosl = v0j->GetParamP();
+	    const AliExternalTrackParam * paramNegl = v0j->GetParamN();
             if (!pTrack || !nTrack) {
                 Printf("ERROR: Could not retreive one of the daughter track");
                 continue;
             }
-    
+	    // Draw Armenteros-Podolanski Plot
+            // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
+	
+            // Lambda -> P+ pi-  ---------------
+            AliKFParticle negKFKpim(*paramNegl,211);
+            AliKFParticle posKFKprot(*paramPosl,2212);
+            AliKFParticle lamKF(negKFKpim,posKFKprot);    
+	    
+	    if (pTrack->GetMass() > 0.5){
+	    printf("this v0 is antilambda");
+	    AliKFParticle negKFKpim(*paramNegl,2212);
+            AliKFParticle posKFKprot(*paramPosl,211);
+            AliKFParticle lamKF(negKFKpim,posKFKprot);
+	    }
+
+	    Double_t posp[3]= { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
+            Double_t negp[3]= { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
+            Double_t moth[3]= { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
+            Double_t arpod[2]= {0,0};
+            GetArPod( posp, negp, moth, arpod );
+	    
+            ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1],arpod[0]);
+	    
             if ( pTrack->GetSign() == nTrack->GetSign()) {
                 continue;
             }
@@ -445,4 +493,23 @@ double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t
 {
     return Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2;
 }
-
+void GetArPod( Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arpod[2] ){
+    
+    //from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov
+    
+    TVector3 momentumVectorPositiveKF(pos[0],pos[1],pos[2]);
+    TVector3 momentumVectorNegativeKF(neg[0],neg[1],neg[2]);
+    TVector3 vecV0(moth[0],moth[1],moth[2]);
+    
+    Float_t thetaV0pos=TMath::ACos(( momentumVectorPositiveKF* vecV0)/(momentumVectorPositiveKF.Mag() * vecV0.Mag()));
+    Float_t thetaV0neg=TMath::ACos(( momentumVectorNegativeKF* vecV0)/(momentumVectorNegativeKF.Mag() * vecV0.Mag()));
+    
+    Float_t alfa =((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)-(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg))/
+    ((momentumVectorPositiveKF.Mag())*TMath::Cos(thetaV0pos)+(momentumVectorNegativeKF.Mag())*TMath::Cos(thetaV0neg)) ;
+    
+    Float_t qt = momentumVectorPositiveKF.Mag()*TMath::Sin(thetaV0pos);
+    
+    arpod[0]=qt;
+    arpod[1]=alfa;
+    
+}
