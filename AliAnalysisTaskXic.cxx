@@ -74,10 +74,8 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
     // this chain is created by the analysis manager, so no need to worry about it,
     // it does its work automatically
-    DefineOutput(1, TList::Class());    // define the ouptut of the analysis: in this case it's a list of histograms
-    // you can add more output objects by calling DefineOutput(2, classname::Class())
-    // if you add more output objects, make sure to call PostData for all of them, and to
-    // make changes to your AddTask macro!
+    DefineOutput(1, TList::Class());    // QA histograms
+    DefineOutput(2, TList::Class());    // Outputs
 }
 //_____________________________________________________________________________
 AliAnalysisTaskXic::~AliAnalysisTaskXic()
@@ -89,6 +87,10 @@ AliAnalysisTaskXic::~AliAnalysisTaskXic()
     if (fOutputList) {
         delete fOutputList;     // at the end of your task, it is deleted from memory by calling this function
     }
+    if (fOutputList2) {
+        delete fOutputList2;     // at the end of your task, it is deleted from memory by calling this function
+    }
+
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserCreateOutputObjects()
@@ -102,10 +104,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     // to an output file
     //
     fOutputList = new TList();          // this is a list which will contain all of your histograms
-    // at the end of the analysis, the contents of this list are written
-    // to the output file
+    fOutputList2 = new TList();
     fOutputList->SetOwner(kTRUE);       // memory stuff: the list is owner of all objects it contains and will delete them
-    // if requested (dont worry about this now)
+    fOutputList2->SetOwner(kTRUE);
 
     // example of a histogram
     TH1F *fMultDist = new TH1F("fMultDist", "Multiplicity Distribution", 200, 0, 20000);
@@ -157,9 +158,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->Add(fVertexDistXYZ);
 
     TH2F *hInvMassWithPt = new TH2F("hInvMassWithPt", "Invariant mass distribution vs Pt", 1000, 2.0, 3.0, 100, 0, 10);
-    fOutputList->Add(hInvMassWithPt);
+    fOutputList2->Add(hInvMassWithPt);
     TH1F *hInvMass = new TH1F("hInvMass", "Invariant mass distribution", 1000, 2.0, 3.0);
-    fOutputList->Add(hInvMass);
+    fOutputList2->Add(hInvMass);
 
     TH2F *hTPCPID_K0s = new TH2F("hTPCPID_K0s","PID via TPC",500,0,20,500,0,200);
     fOutputList->Add(hTPCPID_K0s);
@@ -184,6 +185,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     PostData(1, fOutputList);           // postdata will notify the analysis manager of changes / updates to the
     // fOutputList object. the manager will in the end take care of writing your output to file
     // so it needs to know what's in the output
+    PostData(2, fOutputList2);
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
@@ -418,13 +420,12 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             tV0mom_result[2] = tV0momi[2] + tV0momj[2];
             fPt_result = sqrt(pow(tV0mom_result[0], 2) + pow(tV0mom_result[1], 2));
 
-            ((TH2F*)fOutputList->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
-            ((TH1F*)fOutputList->FindObject("hInvMass"))->Fill(fMass); // Cumulated
+            ((TH2F*)fOutputList2->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
+            ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
         }
     }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
-    // the output manager which will take care of writing
-
+    PostData(2, fOutputList2);
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::Terminate(Option_t *)

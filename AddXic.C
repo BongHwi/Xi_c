@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////
 //                                                               //            
-// AddXic                                                     //
+// AddXic                                                        //
 // Author: Redmer A. Bertens, Utrecht University, 2012           //
+// Modified: Bong-Hwi Lim, Pusan National University, 2017       //
 //                                                               //
 ///////////////////////////////////////////////////////////////////
 class AliAnalysisDataContainer;
@@ -45,7 +46,8 @@ AliAnalysisTaskXic* AddXic(TString name = "name")
     // your task needs input: here we connect the manager to your task
     mgr->ConnectInput(task,0,mgr->GetCommonInputContainer());
     // same for the output
-    mgr->ConnectOutput(task,1,mgr->CreateContainer("MyOutputContainer", TList::Class(), AliAnalysisManager::kOutputContainer, fileName.Data()));
+    mgr->ConnectOutput(task,1,mgr->CreateContainer("QA", TList::Class(), AliAnalysisManager::kOutputContainer, fileName.Data()));
+    mgr->ConnectOutput(task,2,mgr->CreateContainer("Histograms", TList::Class(), AliAnalysisManager::kOutputContainer, fileName.Data()));
     // in the end, this macro returns a pointer to your task. this will be convenient later on
     // when you will run your analysis in an analysis train on grid
     return task;
