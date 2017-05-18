@@ -154,6 +154,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     hEventSelecInfo->GetXaxis()->SetBinLabel(4, "kSemiCentral");
     hEventSelecInfo->GetXaxis()->SetBinLabel(5, "kINT7");
     hEventSelecInfo->GetXaxis()->SetBinLabel(6, "kAny");
+    hEventSelecInfo->GetXaxis()->SetBinLabel(7, "kPhysicsALL");
 
 
     TH1F *hCentrality = new TH1F("hCentrality", "Centrality", 100, 0, 100);
@@ -231,9 +232,12 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Bool_t isSelected = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kAny);
     if (isSelected) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(5);
 
+    Bool_t isSelectedPHY = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kPhysicsALL);
+    if (isSelectedPHY) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(6);
+
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
-    if (!isSelectedINT7) {cout << "Event Rejected" << endl; return;}
+    if (!isSelectedPHY) {cout << "Event Rejected" << endl; return;}
 
 
 
