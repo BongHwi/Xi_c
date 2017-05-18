@@ -9,22 +9,6 @@ class AliAnalysisDataContainer;
 
 AliAnalysisTaskXic* AddXic(TString name = "name")
 {
-    Bool_t isMC = kFALSE;
-    
-    // Load macro for event selection
-    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
-    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection();
-
-    // Load macro for PID
-    gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
-    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);
-    
-    // Load macro for centrality selection
-    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
-    AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
-
-    // get the manager via the static access member. since it's static, you don't need
-    // an instance of the class to call the function
     AliAnalysisManager *mgr = AliAnalysisManager::GetAnalysisManager();
     if (!mgr) {
         return 0x0;

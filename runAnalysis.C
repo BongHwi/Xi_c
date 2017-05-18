@@ -1,20 +1,11 @@
-void runAnalysis()
+void LoadLibraries();
+void LoadMacros(Bool_t isMC=kFALSE);
+
+void runAnalysis(const char* pluginmode = "local")
 {
-    // set if you want to run the analysis locally (kTRUE), or on grid (kFALSE)
-    Bool_t local = kTRUE;
-   
-    
-    // since we will compile a class, tell root where to look for headers
-    gSystem->Load("libTree.so");
-    gSystem->Load("libGeom.so");
-    gSystem->Load("libVMC.so");
-    gSystem->Load("libPhysics.so");
-    gSystem->Load("libSTEERBase.so");
-    gSystem->Load("libESD.so");
-    gSystem->Load("libAOD.so");
-    gSystem->Load("libANALYSIS.so");
-    gSystem->Load("libOADB.so");
-    gSystem->Load("libANALYSISalice.so");
+    Bool_t isMC = kFALSE;
+
+    LoadLibraries();
     
     gSystem->SetIncludePath("-I. -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include -I$ALICE_ROOT/STEER -I$ALICE_ROOT/ANALYSIS -g");
     gROOT->ProcessLine(".include $ROOTSYS/include");
@@ -33,57 +24,33 @@ void runAnalysis()
 
     // create the analysis manager
     AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskExample");
-   // AliESDInputHandler *ESDH = new AliESDInputHandler();
     AliVEventHandler* esdH = new AliESDInputHandler();
     ((AliESDInputHandler *) esdH)->SetReadFriends(kFALSE);
     mgr->SetInputEventHandler(esdH);
 
-    // compile the class (locally)
-    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
-    // load the addtask macro
-    gROOT->LoadMacro("AddXic.C");
-    // create an instance of your analysis task
-    AliAnalysisTaskXic *task = AddXic();
+    LoadMacros(isMC);
 
     if(!mgr->InitAnalysis()) return;
     //mgr->SetDebugLevel(2);
     mgr->PrintStatus();
     mgr->SetUseProgressBar(1, 25);
 
-    if(local) {
-        // if you want to run locally, we need to define some input
+    if(pluginmode=="local") {
         TChain* chain = new TChain("esdTree");
-        // add a few files to the chain (change this so that your local files are added)
-       // chain->Add("/Volumes/Transcend/PbPb/tmp/170593/AliESDs.root");
-        chain->Add("/home/blim/HMTF/ESDexample2/AliESDs.root");
+        chain->Add("/home/blim/data/AliESDs.root");
 
-        // start the analysis locally, reading the events from the tchain
         mgr->StartAnalysis("local", chain);
     } else {
-        // if we want to run on grid, we create and configure the plugin
         AliAnalysisAlien *plugin = new AliAnalysisAlien();
         
-        // plugin->SetUser("Your alien username here");
-        plugin->SetUser("blim");
-        
-        // Specify working disk
+        plugin->SetUser("blim"); 
         gSystem->Setenv("alien_CLOSE_SE","working_disk_SE");
-        
-        // Set the run mode (can be "full", "test", "offline", "submit" or "terminate")
-       // plugin->SetRunMode("test");  // VERY IMPORTANT
-        // set the Alien API version
         plugin->SetAPIVersion("V1.1x");
-
-        // select the aliphysics version. all other packages
-        // are LOADED AUTOMATICALLY!
         plugin->SetAliROOTVersion("v5-06-15");
         plugin->SetAliPhysicsVersion("v5-06-15-01");
-       
-        // make sure your source files get copied to grid
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
    
-        // select the input data
         plugin->SetGridDataDir("/alice/data/2015/LHC15n");
         plugin->SetDataPattern("/pass4/*AliESDs.root");
         // MC has no prefix, data has prefix 000
@@ -93,11 +60,9 @@ void runAnalysis()
         for (Int_t irun=runNmin;irun<runNmax;irun++){
             plugin->AddRunNumber((Int_t )runList[irun]);
         }
-        // number of files per subjob
         plugin->SetSplitMaxInputFileNumber(10);
         
         plugin->SetExecutable("Xic.sh");
-        // specify how many seconds your job may take
         plugin->SetTTL(40000);
         plugin->SetJDLName("Xic.jdl");
 
@@ -112,14 +77,46 @@ void runAnalysis()
 
         // connect the alien plugin to the manager
         mgr->SetGridHandler(plugin);
-        // and launch the analysis
-        plugin->SetRunMode("test");
-        // merging: run with "terminate" to merge on grid
-        // after re-running the jobs in SetRunMode("terminate")
-        // (see below) mode, set SetMergeViaJDL(kFALSE)
-        // to collect final results
-        
+        plugin->SetRunMode(pluginmode);
         mgr->StartAnalysis("grid");
         
     }
+}
+void LoadLibraries()
+{
+    // since we will compile a class, tell root where to look for headers
+    gSystem->Load("libTree.so");
+    gSystem->Load("libGeom.so");
+    gSystem->Load("libVMC.so");
+    gSystem->Load("libPhysics.so");
+    gSystem->Load("libSTEERBase.so");
+    gSystem->Load("libESD.so");
+    gSystem->Load("libAOD.so");
+    gSystem->Load("libANALYSIS.so");
+    gSystem->Load("libOADB.so");
+    gSystem->Load("libANALYSISalice.so");
+    printf("Library Loading Complete");
+}
+void LoadMacros(Bool_t isMC)
+{
+    // compile the class (locally)
+    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
+
+    // Load macro for event selection
+    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
+    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection();
+
+    // Load macro for PID
+    gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
+    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);
+
+    // Load macro for centrality selection
+    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
+    AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
+
+    // load the addtask macro
+    gROOT->LoadMacro("AddXic.C");
+    // create an instance of your analysis task
+    AliAnalysisTaskXic *task = AddXic();
+    printf("Macro Loading Complete");
 }
