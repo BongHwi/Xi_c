@@ -1,7 +1,7 @@
 void LoadLibraries();
 void LoadMacros(Bool_t isMC=kFALSE);
 
-void runAnalysis(const char* pluginmode = "local")
+void runAnalysis(TString pluginmode = "test", const char *dataset = "data.txt")
 {
     Bool_t isMC = kFALSE;
 
@@ -36,11 +36,13 @@ void runAnalysis(const char* pluginmode = "local")
     mgr->SetUseProgressBar(1, 25);
 
     if(pluginmode=="local") {
+	printf("LOCAL MODE");
         TChain* chain = new TChain("esdTree");
-        chain->Add("/home/blim/data/AliESDs.root");
-
+        // chain->Add("/home/blim/data/AliESDs.root");
+	chain = CreateESDChain(dataset);
         mgr->StartAnalysis("local", chain);
     } else {
+	printf("GRID MODE");
         AliAnalysisAlien *plugin = new AliAnalysisAlien();
         
         plugin->SetUser("blim"); 
@@ -116,6 +118,9 @@ void LoadMacros(Bool_t isMC)
 
     // load the addtask macro
     gROOT->LoadMacro("AddXic.C");
+
+    // Load Create ESD chain macro
+    gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
     // create an instance of your analysis task
     AliAnalysisTaskXic *task = AddXic();
     printf("Macro Loading Complete");
