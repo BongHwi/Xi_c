@@ -333,7 +333,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-
+	/*
 	Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
         Float_t sigTPC = pTrack->GetTPCsignal();
         Float_t nsigpip= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
@@ -342,7 +342,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 	((TH2F*)fOutputList->FindObject("hTPCPID_K0s"))->Fill(fTPCPIDmom,sigTPC);
 	if (nsigpip > 3.0 && nsigpin > 3.0 ) continue;
 	((TH2F*)fOutputList->FindObject("hTPCPID_K0s_after"))->Fill(fTPCPIDmom,sigTPC);
-
+	*/
         // find new v0 for K0Short
         v0i->ChangeMassHypothesis(310); //kK0Short
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
@@ -389,7 +389,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     
             //Findable clusters > 0 condition
             if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-
+	    /*
 	    Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
             Float_t sigTPC = pTrack->GetTPCsignal();
             //Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
@@ -399,7 +399,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             ((TH2F*)fOutputList->FindObject("hTPCPID_lam"))->Fill(fTPCPIDmom,sigTPC);
             if (nsigprP > 3.0 || nsigprN > 3.0) continue;
             ((TH2F*)fOutputList->FindObject("hTPCPID_lam_after"))->Fill(fTPCPIDmom,sigTPC);
-
+	    */
             // find new v0 for Lambda0
             v0j->ChangeMassHypothesis(3122); //kLambda0
             v0j->GetPxPyPz(tV0momj[0], tV0momj[1], tV0momj[2]);
