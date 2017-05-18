@@ -237,7 +237,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
-    //if (!isSelectedINT7) {cout << "Event Rejected" << endl; return;}
+    if (!isSelectedINT7) {cout << "Event Rejected" << endl; return;}
 
 
 
