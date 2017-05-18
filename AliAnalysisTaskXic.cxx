@@ -119,10 +119,6 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fInvLambda_before->GetXaxis()->SetTitle("fInvLambda_before");
     fOutputList->Add(fInvLambda_before);
 
-    TH1F *fInvLambdaCheck = new TH1F("fInvLambdaCheck", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambdaCheck->GetXaxis()->SetTitle("fInvLambdaCheck");
-    fOutputList->Add(fInvLambdaCheck);
-
     TH1F *fInvLambda = new TH1F("fInvLambda", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
     fInvLambda->GetXaxis()->SetTitle("fInvLambda");
     fOutputList->Add(fInvLambda);
