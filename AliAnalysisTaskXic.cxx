@@ -134,7 +134,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
     fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
     fOutputList->Add(fInvK0Short);
-
+    TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
+    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
+    fOutputList->Add(fInvK0Short_beforePID);
 
     TH1F *fInvLambdaCut = new TH1F("fInvLambdaCut", "Invariant mass distribution of Lambda after mass window cut", 400, 1.0, 1.2);
     fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
@@ -357,6 +359,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+	Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
+	Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
 	/*
 	Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
         Float_t sigTPC = pTrack->GetTPCsignal();
@@ -371,11 +375,12 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         v0i->ChangeMassHypothesis(310); //kK0Short
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         lInvMassK0Short = v0i->GetEffMass();
-        ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0Short); // Before Cut
+        ((TH1F*)fOutputList->FindObject("fInvK0Short_beforePID"))->Fill(lInvMassK0Short); // Before PID
 	v0i->ChangeMassHypothesis(3122); //kLambda0
         lInvMassLambda = v0i->GetEffMass();
        	((TH1F*)fOutputList->FindObject("fInvLambda_before"))->Fill(lInvMassLambda); // Before Cut
-
+	if (nsigmapiP > 3.0 || nsigmapiN > 3.0) continue;
+	((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0Short); // Before Cut
 	if (lInvMassK0Short > k0Mass + 0.008 || lInvMassK0Short < k0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0Short); // After Cut
 
@@ -408,7 +413,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             AliKFParticle lamKF(negKFKpim,posKFKprot);    
 	    
 	    if (pTrack->GetMass() > 0.5){
-	    printf("this v0 is antilambda");
+	    //printf("this v0 is antilambda");
 	    AliKFParticle negKFKpim(*paramNegl,2212);
             AliKFParticle posKFKprot(*paramPosl,211);
             AliKFParticle lamKF(negKFKpim,posKFKprot);
@@ -437,6 +442,16 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     
             //Findable clusters > 0 condition
             if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+     	    if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+
+            Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
+            Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
+            if (pTrack->GetMass() > 0.5) if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue;
+	    if (pTrack->GetMass() < 0.5){
+	    Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
+    	    Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
+	    if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
+	    }
 	    /*
 	    Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
             Float_t sigTPC = pTrack->GetTPCsignal();
