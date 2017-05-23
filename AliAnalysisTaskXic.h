@@ -29,7 +29,7 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
 
 
         TH1F*                   fHistPt;        //! dummy histogram
-
+	TH1F    *fHistSwappedV0Counter;     					        //! Swapped V0 Counter
         AliAnalysisTaskXic(const AliAnalysisTaskXic&); // not implemented
         AliAnalysisTaskXic& operator=(const AliAnalysisTaskXic&); // not implemented
 

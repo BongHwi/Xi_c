@@ -30,6 +30,7 @@
 
 #include "AliAnalysisTask.h"
 #include "AliAnalysisManager.h"
+#include "AliLog.h"
 
 #include "AliVEvent.h"
 #include "AliVEventHandler.h"
@@ -52,6 +53,7 @@ ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
 double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
 void GetArPod(Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arpod[2]);
+void CheckChargeV0(AliESDv0 *v0);
 
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
@@ -60,7 +62,8 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fPIDResponse(0x0),
     fCentrality(0),
     fTrackCut(0x0),
-    fHistPt(0)
+    fHistPt(0),
+    fHistSwappedV0Counter(0)
 {
     // default constructor, don't allocate memory here!
     // this is used by root for IO purposes, it needs to remain empty
@@ -73,7 +76,8 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     fPIDResponse(0x0),
     fCentrality(0),
     fTrackCut(0x0),
-    fHistPt(0)
+    fHistPt(0),
+    fHistSwappedV0Counter(0)
 {
     // constructor
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
@@ -137,6 +141,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
     fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
     fOutputList->Add(fInvK0Short_beforePID);
+    TH1F *fInvLambda_beforePID = new TH1F("fInvLambda_beforePID", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
+    fInvLambda_beforePID->GetXaxis()->SetTitle("fInvLambda_beforePID");
+    fOutputList->Add(fInvLambda_beforePID);
 
     TH1F *fInvLambdaCut = new TH1F("fInvLambdaCut", "Invariant mass distribution of Lambda after mass window cut", 400, 1.0, 1.2);
     fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
@@ -144,7 +151,13 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *fInvK0ShortCut = new TH1F("fInvK0ShortCut", "Invariant mass distribution of K0s after mass window cut", 400, 0.3, 0.7);
     fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
     fOutputList->Add(fInvK0ShortCut);
-
+    
+    if(! fHistSwappedV0Counter) {
+      fHistSwappedV0Counter = new TH1F("fHistSwappedV0Counter", 
+         "Swap or not histo;Swapped (1) or not (0); count", 
+         2, 0, 2); 		
+      fOutputList->Add(fHistSwappedV0Counter);
+    }
 
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
     fOutputList->Add(hEventSelecInfo);
@@ -213,7 +226,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks()); // # of tracks --> multiplicity distribution
 
 
-
     //------------------------------------------------
     //Step 1: Check for selected Trigger
     //------------------------------------------------
@@ -232,14 +244,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Bool_t isSelected = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kAny);
     if (isSelected) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(5);
 
-    //Bool_t isSelectedPHY = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kPhysicsALL);
-    //if (isSelectedPHY) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(6);
-
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
     if (!isSelectedINT7) {cout << "Event Rejected" << endl; return;}
-
-
 
 
     //------------------------------------------------
@@ -306,11 +313,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Double_t ei = 0.;       Double_t ej = 0.;
     Double_t angle = 0.;    Double_t fPt_result = 0.;
     Double_t  fMass = 0.;
+    Bool_t fkUseOnTheFly = kFALSE;
+    Int_t    lOnFlyStatus = 0;// nv0sOn = 0, nv0sOff = 0;
 
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
-
+    /* for test
     //for (Int_t iV0 = 0; iV0 < nv0s; iV0++)
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++)
     {   // This is the begining of the V0 loop for first V0(K0Short)
@@ -362,19 +371,19 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
 
         //Findable clusters > 0 condition
-        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-	Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
-	Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
-	/*
-	Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
-        Float_t sigTPC = pTrack->GetTPCsignal();
-        Float_t nsigpip= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
-	Float_t nsigpin= fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kPion));
+        //if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+	//Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
+	//Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
+	
+	//Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
+        //Float_t sigTPC = pTrack->GetTPCsignal();
+        //Float_t nsigpip= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
+	//Float_t nsigpin= fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kPion));
 
-	((TH2F*)fOutputList->FindObject("hTPCPID_K0s"))->Fill(fTPCPIDmom,sigTPC);
-	if (nsigpip > 3.0 && nsigpin > 3.0 ) continue;
-	((TH2F*)fOutputList->FindObject("hTPCPID_K0s_after"))->Fill(fTPCPIDmom,sigTPC);
-	*/
+	//((TH2F*)fOutputList->FindObject("hTPCPID_K0s"))->Fill(fTPCPIDmom,sigTPC);
+	//if (nsigpip > 3.0 && nsigpin > 3.0 ) continue;
+	//((TH2F*)fOutputList->FindObject("hTPCPID_K0s_after"))->Fill(fTPCPIDmom,sigTPC);
+	
         // find new v0 for K0Short
         v0i->ChangeMassHypothesis(310); //kK0Short
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
@@ -456,17 +465,17 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     	    Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
 	    if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
 	    }
-	    /*
-	    Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
-            Float_t sigTPC = pTrack->GetTPCsignal();
+	    
+	    //Float_t fTPCPIDmom = pTrack->GetTPCmomentum();
+            //Float_t sigTPC = pTrack->GetTPCsignal();
             //Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kPion));
             //Float_t nsigk= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kKaon));
-            Float_t nsigprP = fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kProton));
-	    Float_t nsigprN = fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kProton));
-            ((TH2F*)fOutputList->FindObject("hTPCPID_lam"))->Fill(fTPCPIDmom,sigTPC);
-            if (nsigprP > 3.0 || nsigprN > 3.0) continue;
-            ((TH2F*)fOutputList->FindObject("hTPCPID_lam_after"))->Fill(fTPCPIDmom,sigTPC);
-	    */
+            //Float_t nsigprP = fabs(fPIDResponse->NumberOfSigmasTPC(pTrack,AliPID::kProton));
+	    //Float_t nsigprN = fabs(fPIDResponse->NumberOfSigmasTPC(nTrack,AliPID::kProton));
+            //((TH2F*)fOutputList->FindObject("hTPCPID_lam"))->Fill(fTPCPIDmom,sigTPC);
+            //if (nsigprP > 3.0 || nsigprN > 3.0) continue;
+            //((TH2F*)fOutputList->FindObject("hTPCPID_lam_after"))->Fill(fTPCPIDmom,sigTPC);
+	    
             // find new v0 for Lambda0
             v0j->ChangeMassHypothesis(3122); //kLambda0
             v0j->GetPxPyPz(tV0momj[0], tV0momj[1], tV0momj[2]);
@@ -493,6 +502,93 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
         }
     }
+    */
+       for (Int_t iV0 = 0; iV0 < nv0s; iV0++)
+    {   // This is the begining of the V0 loop for first V0(K0Short)
+        AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
+        if (!v0i) continue;
+	//---> Fix On-the-Fly candidates, count how many swapped
+        if( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ){
+          fHistSwappedV0Counter -> Fill( 1 );
+        }else{
+          fHistSwappedV0Counter -> Fill( 0 ); 
+        }
+        if ( fkUseOnTheFly ) CheckChargeV0(v0i); 
+	lOnFlyStatus = v0i->GetOnFlyStatus();
+
+        lPt = v0i->Pt();
+        if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
+
+        UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
+        UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
+
+        AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
+        AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
+        const AliExternalTrackParam * paramPosl = v0i->GetParamP();
+	const AliExternalTrackParam * paramNegl = v0i->GetParamN();
+
+	if (!pTrack || !nTrack) {
+            Printf("ERROR: Could not retreive one of the daughter track");
+            continue;
+        }
+	// Draw Armenteros-Podolanski Plot
+	// from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
+	
+	// Lambda -> P+ pi-  ---------------
+            AliKFParticle negKFKpim(*paramNegl,211);
+            AliKFParticle posKFKprot(*paramPosl,2212);
+            AliKFParticle lamKF(negKFKpim,posKFKprot);    
+	    
+	    if (pTrack->GetMass() > 0.5){
+	    //printf("this v0 is antilambda");
+	    AliKFParticle negKFKpim(*paramNegl,2212);
+            AliKFParticle posKFKprot(*paramPosl,211);
+            AliKFParticle lamKF(negKFKpim,posKFKprot);
+	    }
+
+	    Double_t posp[3]= { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
+            Double_t negp[3]= { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
+            Double_t moth[3]= { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
+            Double_t arpod[2]= {0,0};
+            GetArPod( posp, negp, moth, arpod );
+	    
+            ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1],arpod[0]);
+
+        if ( pTrack->GetSign() == nTrack->GetSign()) {
+            continue;
+        }
+
+        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
+        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+
+        if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+
+        //GetKinkIndex condition
+        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+
+        //Findable clusters > 0 condition
+        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+        // find new v0 for Lambda
+	v0i->ChangeMassHypothesis(3122);
+        v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        lInvMassLambda = v0i->GetEffMass();
+        ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
+	Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
+        Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
+        if (pTrack->GetMass() > 0.5) if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue;
+        if (pTrack->GetMass() < 0.5){
+        Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
+        Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
+        if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
+        }
+	if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
+	((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
+	if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
+	((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
+	}
+	}
+
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
 }
@@ -532,3 +628,59 @@ void GetArPod( Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arp
     arpod[1]=alfa;
     
 }
+void CheckChargeV0(AliESDv0 *v0)
+{
+   // This function is copied from PWGLF/STRANGENESS/LambdaK0/AliAnalysisTaskExtractV0.cxx
+   // This function checks charge of negative and positive daughter tracks. 
+   // If incorrectly defined (onfly vertexer), swaps out. 
+   if( v0->GetParamN()->Charge() > 0 && v0->GetParamP()->Charge() < 0 ){
+      //V0 daughter track swapping is required! Note: everything is swapped here... P->N, N->P
+      Long_t lCorrectNidx = v0->GetPindex();
+      Long_t lCorrectPidx = v0->GetNindex();
+      Double32_t	lCorrectNmom[3];
+      Double32_t	lCorrectPmom[3];
+      v0->GetPPxPyPz( lCorrectNmom[0], lCorrectNmom[1], lCorrectNmom[2] );
+      v0->GetNPxPyPz( lCorrectPmom[0], lCorrectPmom[1], lCorrectPmom[2] );
+      AliExternalTrackParam	lCorrectParamN(
+        v0->GetParamP()->GetX() , 
+        v0->GetParamP()->GetAlpha() , 
+        v0->GetParamP()->GetParameter() , 
+        v0->GetParamP()->GetCovariance() 
+      );
+      AliExternalTrackParam	lCorrectParamP(
+        v0->GetParamN()->GetX() , 
+        v0->GetParamN()->GetAlpha() , 
+        v0->GetParamN()->GetParameter() , 
+        v0->GetParamN()->GetCovariance() 
+      );
+      lCorrectParamN.SetMostProbablePt( v0->GetParamP()->GetMostProbablePt() );
+      lCorrectParamP.SetMostProbablePt( v0->GetParamN()->GetMostProbablePt() );
+      //Get Variables___________________________________________________
+      Double_t lDcaV0Daughters = v0 -> GetDcaV0Daughters();
+      Double_t lCosPALocal     = v0 -> GetV0CosineOfPointingAngle(); 
+      Bool_t lOnFlyStatusLocal = v0 -> GetOnFlyStatus();
+      //Create Replacement Object_______________________________________
+      AliESDv0 *v0correct = new AliESDv0(lCorrectParamN,lCorrectNidx,lCorrectParamP,lCorrectPidx);
+      v0correct->SetDcaV0Daughters          ( lDcaV0Daughters   );
+      v0correct->SetV0CosineOfPointingAngle ( lCosPALocal       );
+      v0correct->ChangeMassHypothesis       ( kK0Short          );
+      v0correct->SetOnFlyStatus             ( lOnFlyStatusLocal );
+      //Reverse Cluster info..._________________________________________
+      v0correct->SetClusters( v0->GetClusters( 1 ), v0->GetClusters ( 0 ) );
+      *v0 = *v0correct;
+      //Proper cleanup..._______________________________________________
+      v0correct->Delete();
+      v0correct = 0x0;
+      //Just another cross-check and output_____________________________
+      if( v0->GetParamN()->Charge() > 0 && v0->GetParamP()->Charge() < 0 ) {
+        //AliWarning("Found Swapped Charges, tried to correct but something FAILED!");
+      }else{
+        //AliWarning("Found Swapped Charges and fixed.");
+      }
+      //________________________________________________________________
+   }else{
+      //Don't touch it! ---
+      //Printf("Ah, nice. Charges are already ordered...");
+   }
+   return;
+} 

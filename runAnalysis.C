@@ -1,10 +1,9 @@
 void LoadLibraries();
 void LoadMacros(Bool_t isMC=kFALSE);
 
-void runAnalysis(TString pluginmode = "test", const char *dataset = "data.txt")
+void runAnalysis(const char* pluginmode = "local")
 {
     Bool_t isMC = kFALSE;
-
     LoadLibraries();
     
     gSystem->SetIncludePath("-I. -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include -I$ALICE_ROOT/STEER -I$ALICE_ROOT/ANALYSIS -g");
@@ -23,7 +22,7 @@ void runAnalysis(TString pluginmode = "test", const char *dataset = "data.txt")
     Int_t runList[1]={244628}; //for test
 
     // create the analysis manager
-    AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskExample");
+    AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskXi_c");
     AliVEventHandler* esdH = new AliESDInputHandler();
     ((AliESDInputHandler *) esdH)->SetReadFriends(kFALSE);
     mgr->SetInputEventHandler(esdH);
@@ -38,8 +37,7 @@ void runAnalysis(TString pluginmode = "test", const char *dataset = "data.txt")
     if(pluginmode=="local") {
 	printf("LOCAL MODE");
         TChain* chain = new TChain("esdTree");
-        // chain->Add("/home/blim/data/AliESDs.root");
-	chain = CreateESDChain(dataset);
+        chain->Add("/home/blim/data/AliESDs.root");
         mgr->StartAnalysis("local", chain);
     } else {
 	printf("GRID MODE");
@@ -55,6 +53,7 @@ void runAnalysis(TString pluginmode = "test", const char *dataset = "data.txt")
    
         plugin->SetGridDataDir("/alice/data/2015/LHC15n");
         plugin->SetDataPattern("/pass4/*AliESDs.root");
+	plugin->SetOutputFiles("AnalysisResults.root");
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
@@ -120,7 +119,7 @@ void LoadMacros(Bool_t isMC)
     gROOT->LoadMacro("AddXic.C");
 
     // Load Create ESD chain macro
-    gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
+    //gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
     // create an instance of your analysis task
     AliAnalysisTaskXic *task = AddXic();
     printf("Macro Loading Complete");
