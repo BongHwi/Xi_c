@@ -41,6 +41,7 @@
 #include "AliCascadeVertexer.h"
 #include "AliCentrality.h"
 
+#include "AliESDv0.h"
 #include "AliKFParticle.h"
 #include "AliKFVertex.h"
 #include "AliAnalysisTaskXic.h"
@@ -292,6 +293,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     //------------------------------------------------
     if (fESD->IsPileupFromSPD()) return; // Reject Pile-up events
 
+    Double_t  lMagneticField = fESD->GetMagneticField();
+
     double lInvMassLambda = 0.;
     double lInvMassK0Short = 0.0;
 
@@ -314,7 +317,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Double_t angle = 0.;    Double_t fPt_result = 0.;
     Double_t  fMass = 0.;
     Bool_t fkUseOnTheFly = kFALSE;
-    Int_t    lOnFlyStatus = 0;// nv0sOn = 0, nv0sOff = 0;
 
     // loop for Lambda
     Int_t nv0s = 0;
@@ -514,7 +516,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           fHistSwappedV0Counter -> Fill( 0 ); 
         }
         if ( fkUseOnTheFly ) CheckChargeV0(v0i); 
+
+	Int_t    lOnFlyStatus = 0;// nv0sOn = 0, nv0sOff = 0;
 	lOnFlyStatus = v0i->GetOnFlyStatus();
+	if(lOnFlyStatus == 0) continue;
 
         lPt = v0i->Pt();
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
@@ -531,6 +536,28 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
+	if ( pTrack->GetSign() == nTrack->GetSign()) {
+            continue;
+        }
+	//GetKinkIndex condition
+        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
+
+	// TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
+        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
+	
+	// Cosine Pointing Angle and DCA Values
+	Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0],primaryVtx[1],primaryVtx[2]);
+
+	Double_t lV0Position[3];
+	v0i->GetXYZ(lV0Position[0],lV0Position[1],lV0Position[2]);
+	Double_t  lV0Radius      = TMath::Sqrt(lV0Position[0]*lV0Position[0]+lV0Position[1]*lV0Position[1]);
+	Double_t  lDcaPosToPrimVertex=TMath::Abs(pTrack->GetD(primaryVtx[0],primaryVtx[1],lMagneticField));
+        Double_t lDcaNegToPrimVertex=TMath::Abs(pTrack->GetD(primaryVtx[0],primaryVtx[1],lMagneticField));
+        Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
+
+	if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) ||(lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;	
+
 	// Draw Armenteros-Podolanski Plot
 	// from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
 	
@@ -554,18 +581,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 	    
             ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1],arpod[0]);
 
-        if ( pTrack->GetSign() == nTrack->GetSign()) {
-            continue;
-        }
-
-        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
-
-        //GetKinkIndex condition
-        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
 
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
