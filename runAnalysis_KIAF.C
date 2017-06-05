@@ -10,6 +10,10 @@ void runAnalysis_KIAF(const char *dataset = "test1.list")
     AliESDInputHandler *esdH =  AddESDHandler();
     mgr->SetInputEventHandler(esdH);
 
+    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection();
+    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(kFALSE); 
+    AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
+
     // create an instance of your analysis task
     AliAnalysisTaskXic *task = AddXic();
     mgr->PrintStatus();
@@ -49,5 +53,9 @@ void LoadMacros()
 
     gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/train/AddESDHandler.C");
     gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
+    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
+    gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
+    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
+
     printf("Macro Loading Complete");
 }

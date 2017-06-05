@@ -247,8 +247,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
-    if (!isSelectedINT7) {cout << "Event Rejected" << endl; return;}
-
+    if (isSelectedMB) cout << "MB Event!" << endl;
+    if (!(isSelectedINT7|isSelectedMB|isSelectedkCentral|isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
+    cout << "Pass!" << endl;
 
     //------------------------------------------------
     //Step 2: Check for centrality for Pb-Pb
@@ -287,7 +288,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ////////////******* DO Vertex-Z selecction *******////////////
     if (fabs(primaryVtx[2]) > 10.) return;
 
-
     //------------------------------------------------
     //Step 4: Check for SPD Pileup
     //------------------------------------------------
@@ -297,6 +297,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     double lInvMassLambda = 0.;
     double lInvMassK0Short = 0.0;
+    Double_t MassLam = 1.115683 ;
 
     static Double_t k0Mass = 0.497611;      static Double_t l0Mass = 1.115683;
     static Double_t piMass = 0.13957;       static Double_t protonMass = 0.93827;
@@ -317,7 +318,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Double_t angle = 0.;    Double_t fPt_result = 0.;
     Double_t  fMass = 0.;
     Bool_t fkUseOnTheFly = kFALSE;
-
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
@@ -558,38 +558,39 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
 	if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) ||(lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;	
 
-	// Draw Armenteros-Podolanski Plot
-	// from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
-	
-	// Lambda -> P+ pi-  ---------------
-            AliKFParticle negKFKpim(*paramNegl,211);
-            AliKFParticle posKFKprot(*paramPosl,2212);
-            AliKFParticle lamKF(negKFKpim,posKFKprot);    
-	    
-	    if (pTrack->GetMass() > 0.5){
-	    //printf("this v0 is antilambda");
-	    AliKFParticle negKFKpim(*paramNegl,2212);
-            AliKFParticle posKFKprot(*paramPosl,211);
-            AliKFParticle lamKF(negKFKpim,posKFKprot);
-	    }
-
-	    Double_t posp[3]= { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
-            Double_t negp[3]= { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
-            Double_t moth[3]= { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
-            Double_t arpod[2]= {0,0};
-            GetArPod( posp, negp, moth, arpod );
-	    
-            ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1],arpod[0]);
-
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
-
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
         // find new v0 for Lambda
 	v0i->ChangeMassHypothesis(3122);
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         lInvMassLambda = v0i->GetEffMass();
-        ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
+       // Draw Armenteros-Podolanski Plot
+        // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
+
+        // Lambda -> P+ pi-  ---------------
+            AliKFParticle negKFKpim(*paramNegl,211);
+            AliKFParticle posKFKprot(*paramPosl,2212);
+            AliKFParticle lamKF(negKFKpim,posKFKprot);
+            lamKF.SetMassConstraint(MassLam, 0.2 );
+
+            //printf("this v0 is antilambda");
+            AliKFParticle negKFKaprom(*paramNegl,2212);
+            AliKFParticle posKFKapit(*paramPosl,211);
+            AliKFParticle alamKF(negKFKaprom,posKFKapit);
+            alamKF.SetMassConstraint(MassLam, 0.2 );
+
+            Double_t posp[3]= { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
+            Double_t negp[3]= { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
+            Double_t moth[3]= { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
+            Double_t motha[3]= { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
+            Double_t arpod[2]= {0,0};
+            if (pTrack->GetMass() < 0.5) GetArPod( posp, negp, moth, arpod );
+            if (pTrack->GetMass() > 0.5) GetArPod( posp, negp, motha, arpod );
+
+            ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1],arpod[0]);
+ 
+	((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
 	Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
         Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
         if (pTrack->GetMass() > 0.5) if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue;
@@ -598,13 +599,15 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
         if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
-	if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
+	//if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
+	if (!(2.5*arpod[1]+0.25<arpod[0]||-2.5*arpod[1]-0.25>arpod[0])) continue; //Armenteros-Podolansiki Cut
+	((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(arpod[1],arpod[0]);
+	
 	((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
 	if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
 	((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
+	//}
 	}
-	}
-
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
 }
