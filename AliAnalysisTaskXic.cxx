@@ -247,9 +247,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
-    if (isSelectedMB) cout << "MB Event!" << endl;
     if (!(isSelectedINT7|isSelectedMB|isSelectedkCentral|isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
-    cout << "Pass!" << endl;
 
     //------------------------------------------------
     //Step 2: Check for centrality for Pb-Pb
@@ -600,7 +598,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
 	//if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-	if (!(2.5*arpod[1]+0.25<arpod[0]||-2.5*arpod[1]-0.25>arpod[0])) continue; //Armenteros-Podolansiki Cut
+	if (TMath::Abs(0.2*arpod[1])<arpod[0]) continue; //Armenteros-Podolansiki Cut
 	((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(arpod[1],arpod[0]);
 	
 	((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
