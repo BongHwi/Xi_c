@@ -304,9 +304,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Cosine Pointing Angle and DCA Values
         Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
         Double_t lV0Position[3];
-        Double_t lV0Radius = 0
+        Double_t lV0Radius = 0;
         v0i->GetXYZ(lV0Position[0], lV0Position[1], lV0Position[2]);
-        Double_t lV0Radius      = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
+        lV0Radius = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
         Double_t lDcaPosToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
         Double_t lDcaNegToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
         Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
@@ -348,13 +348,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliKFParticle negKFKpim(*paramNegl, 211);
         AliKFParticle posKFKprot(*paramPosl, 2212);
         AliKFParticle lamKF(negKFKpim, posKFKprot);
-        lamKF.SetMassConstraint(l0mass, 0.2 );
+        lamKF.SetMassConstraint(l0Mass, 0.2 );
 
         // anit Lambda -> anti P- pi-  -----
         AliKFParticle negKFKaprom(*paramNegl, 2212);
         AliKFParticle posKFKapit(*paramPosl, 211);
         AliKFParticle alamKF(negKFKaprom, posKFKapit);
-        alamKF.SetMassConstraint(l0mass, 0.2 );
+        alamKF.SetMassConstraint(l0Mass, 0.2 );
 
         Double_t posp[3] = { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
         Double_t negp[3] = { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
