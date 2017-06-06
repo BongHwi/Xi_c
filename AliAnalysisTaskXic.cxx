@@ -197,7 +197,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     //fOutputList->Add(fInvK0Short_beforePID);
     //fOutputList->Add(fInvK0ShortCut);
     fOutputList->Add(fInvLambda);
-    fOutputList->Add(fInvLambda_beforePID);
+    //fOutputList->Add(fInvLambda_beforePID);
     fOutputList->Add(fInvLambdaCut);
 
     fOutputList2->Add(hInvMassWithPt);
