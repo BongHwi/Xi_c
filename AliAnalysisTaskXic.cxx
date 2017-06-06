@@ -300,8 +300,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
         lPt = v0i->Pt();
-        if (v0->GetEffMass(4,2) < 1.08 || v0->GetEffMass(4,2) > 1.2 || TMath::Abs(v0->Y(3122))>0.5 ) lambdaCandidate = false;
-        if (v0->GetEffMass(2,4) < 1.08 || v0->GetEffMass(2,4) > 1.2 || TMath::Abs(v0->Y(-3122))>0.5) antilambdaCandidate = false;
+        if (v0i->GetEffMass(4,2) < 1.08 || v0i->GetEffMass(4,2) > 1.2 || TMath::Abs(v0i->Y(3122))>0.5 ) lambdaCandidate = false;
+        if (v0i->GetEffMass(2,4) < 1.08 || v0i->GetEffMass(2,4) > 1.2 || TMath::Abs(v0i->Y(-3122))>0.5) antilambdaCandidate = false;
         // get daughter particle
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
@@ -352,7 +352,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
 		    int dPos = 0;
 		    int dNeg = 0;
-        if(!(v0->GetEffMass(dPos,dNeg) > 1.11 && v0->GetEffMass(dPos,dNeg) < 1.13)) continue;
+        if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
         double lInvMassLambda = 0.;
         if(lambdaCandidate) {
           lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
