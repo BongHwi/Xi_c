@@ -125,54 +125,47 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     //------------------------------------------------
     // Deafult Analysis setup
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
-    fOutputList->Add(hEventSelecInfo);
-    hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(2, "kMB");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(3, "kCentral");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(4, "kSemiCentral");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(5, "kINT7");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(6, "kAny");
-    hEventSelecInfo->GetXaxis()->SetBinLabel(7, "kPhysicsALL");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(2, "kMB");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(3, "kCentral");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(4, "kSemiCentral");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(5, "kINT7");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(6, "kAny");
+      hEventSelecInfo->GetXaxis()->SetBinLabel(7, "kPhysicsALL");
     TH1F *hCentrality = new TH1F("hCentrality", "Centrality", 100, 0, 100);
-    hCentrality->GetXaxis()->SetTitle("Centrality");
-    fOutputList->Add(hCentrality);
+      hCentrality->GetXaxis()->SetTitle("Centrality");
     TH1F *fMultDist = new TH1F("fMultDist", "Multiplicity Distribution", 200, 0, 20000);
-    fMultDist->GetXaxis()->SetTitle("Multiplicity");
-    fOutputList->Add(fMultDist);
+      fMultDist->GetXaxis()->SetTitle("Multiplicity");
     TH3F *fVertexDistXYZ = new TH3F("fVertexDistXYZ", "Vertex Distribution", 20, -1, 1, 20, -1, 1, 60, -30, 30);
-    fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
-    fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
-    fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
-    fOutputList->Add(fVertexDistXYZ);
+      fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
+      fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
+      fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
+    fHistCosPA = new	TH1F("fHistCosPA", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
+    fHistDCAV0Daughters = new	TH1F("fHistDCAV0Daughters", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
+  	fHistDecayL = new	TH1F("fHistDecayL", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
+    fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under Lambda mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
+    fHistBetheBlochTPCNeg = new	TH2F("fHistBetheBlochTPCNeg","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+  	fHistBetheBlochTPCPos = new	TH2F("fHistBetheBlochTPCPos","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
 
     // Armenteros-Podolanski Plot
     TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_kaon);
     TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_lambda);
     TH2F *fArmPod_lambda_cut = new TH2F("fArmPod_lambda_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_lambda_cut);
 
     // K0s
     TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
-    fOutputList->Add(fInvK0Short);
+      fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
     TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
-    fOutputList->Add(fInvK0Short_beforePID);
+      fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
     TH1F *fInvK0ShortCut = new TH1F("fInvK0ShortCut", "Invariant mass distribution of K0s after mass window cut", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
-    fOutputList->Add(fInvK0ShortCut);
+      fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
     // Lambda0
     TH1F *fInvLambda = new TH1F("fInvLambda", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambda->GetXaxis()->SetTitle("fInvLambda");
-    fOutputList->Add(fInvLambda);
+      fInvLambda->GetXaxis()->SetTitle("fInvLambda");
     TH1F *fInvLambda_beforePID = new TH1F("fInvLambda_beforePID", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambda_beforePID->GetXaxis()->SetTitle("fInvLambda_beforePID");
-    fOutputList->Add(fInvLambda_beforePID);
+      fInvLambda_beforePID->GetXaxis()->SetTitle("fInvLambda_beforePID");
     TH1F *fInvLambdaCut = new TH1F("fInvLambdaCut", "Invariant mass distribution of Lambda after mass window cut", 400, 1.0, 1.2);
-    fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
-    fOutputList->Add(fInvLambdaCut);
+      fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
 
     if (! fHistSwappedV0Counter) {
         fHistSwappedV0Counter = new TH1F("fHistSwappedV0Counter",
@@ -183,18 +176,32 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 
     // Analysis Results
     TH2F *hInvMassWithPt = new TH2F("hInvMassWithPt", "Invariant mass distribution vs Pt", 1000, 2.0, 3.0, 100, 0, 10);
-    fOutputList2->Add(hInvMassWithPt);
     TH1F *hInvMass = new TH1F("hInvMass", "Invariant mass distribution", 1000, 2.0, 3.0);
-    fOutputList2->Add(hInvMass);
 
-    TH2F *hTPCPID_K0s = new TH2F("hTPCPID_K0s", "PID via TPC", 500, 0, 20, 500, 0, 200);
-    fOutputList->Add(hTPCPID_K0s);
-    TH2F *hTPCPID_K0s_after = new TH2F("hTPCPID_K0s_after", "PID via TPC", 500, 0, 20, 500, 0, 200);
-    fOutputList->Add(hTPCPID_K0s_after);
-    TH2F *hTPCPID_lam = new TH2F("hTPCPID_lam", "PID via TPC", 500, 0, 20, 500, 0, 200);
-    fOutputList->Add(hTPCPID_lam);
-    TH2F *hTPCPID_lam_after = new TH2F("hTPCPID_lam_after", "PID via TPC", 500, 0, 20, 500, 0, 200);
-    fOutputList->Add(hTPCPID_lam_after);
+    fOutputList->Add(hEventSelecInfo);
+    fOutputList->Add(hCentrality);
+    fOutputList->Add(fMultDist);
+    fOutputList->Add(fVertexDistXYZ);
+    fOutputList->Add(fHistCosPA);
+    fOutputList->Add(fHistDCAV0Daughters);
+  	fOutputList->Add(fHistDecayL);
+  	fOutputList->Add(fHistTauLa);
+	  fOutputList->Add(fHistBetheBlochTPCNeg);
+    fOutputList->Add(fHistBetheBlochTPCPos);
+
+    //fOutputList->Add(fArmPod_kaon);
+    fOutputList->Add(fArmPod_lambda);
+    fOutputList->Add(fArmPod_lambda_cut);
+
+    //fOutputList->Add(fInvK0Short);
+    //fOutputList->Add(fInvK0Short_beforePID);
+    //fOutputList->Add(fInvK0ShortCut);
+    fOutputList->Add(fInvLambda);
+    fOutputList->Add(fInvLambda_beforePID);
+    fOutputList->Add(fInvLambdaCut);
+
+    fOutputList2->Add(hInvMassWithPt);
+    fOutputList2->Add(hInvMass);
 
     //------------------------------------------------
     // Particle Identification Setup
@@ -444,6 +451,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //remove all non-candidates
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
+
+        ((TH1F*)fOutputList->FindObject("fHistCosPA")->Fill(lV0cosPointAngle);
+        ((TH1F*)fOutputList->FindObject("fHistDecayL")->Fill(decayLength);
+        ((TH1F*)fOutputList->FindObject("fHistTauLa")->Fill(cTauLa);
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos")->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
+		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg")->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
