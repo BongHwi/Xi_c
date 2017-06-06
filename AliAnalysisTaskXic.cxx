@@ -241,8 +241,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     //------------------------------------------------
     const AliESDVertex *PrimaryVertexESD;
     PrimaryVertexESD = fESD->GetPrimaryVertex();
-    if(!PrimaryVertexESD) return;
-    if(PrimaryVertexESD->GetNContributors() < 1) return;
+    //if(!PrimaryVertexESD) return;
+    //if(PrimaryVertexESD->GetNContributors() < 1) return;
 
     Double_t primaryVtx[3] = {0};
     primaryVtx[0] = PrimaryVertexESD->GetX(); // call primary vertex position of X
