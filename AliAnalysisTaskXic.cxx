@@ -140,12 +140,12 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
       fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
       fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
       fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
-    fHistCosPA = new	TH1F("fHistCosPA", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
-    fHistDCAV0Daughters = new	TH1F("fHistDCAV0Daughters", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
-  	fHistDecayL = new	TH1F("fHistDecayL", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
-    fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under Lambda mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
-    fHistBetheBlochTPCNeg = new	TH2F("fHistBetheBlochTPCNeg","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
-  	fHistBetheBlochTPCPos = new	TH2F("fHistBetheBlochTPCPos","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+    TH1F *fHistCosPA = new	TH1F("fHistCosPA", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
+    TH1F *fHistDCAV0Daughters = new	TH1F("fHistDCAV0Daughters", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
+  	TH1F *fHistDecayL = new	TH1F("fHistDecayL", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
+    TH1F *fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under Lambda mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
+    TH2F *fHistBetheBlochTPCNeg = new	TH2F("fHistBetheBlochTPCNeg","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+  	TH2F *fHistBetheBlochTPCPos = new	TH2F("fHistBetheBlochTPCPos","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
 
     // Armenteros-Podolanski Plot
     TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
@@ -452,11 +452,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
 
-        ((TH1F*)fOutputList->FindObject("fHistCosPA")->Fill(lV0cosPointAngle);
-        ((TH1F*)fOutputList->FindObject("fHistDecayL")->Fill(decayLength);
-        ((TH1F*)fOutputList->FindObject("fHistTauLa")->Fill(cTauLa);
-        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos")->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
-		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg")->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+        ((TH1F*)fOutputList->FindObject("fHistCosPA")->Fill(lV0cosPointAngle));
+        ((TH1F*)fOutputList->FindObject("fHistDecayL")->Fill(decayLength));
+        ((TH1F*)fOutputList->FindObject("fHistTauLa")->Fill(cTauLa));
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos")->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal()));
+		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg")->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal()));
 
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
