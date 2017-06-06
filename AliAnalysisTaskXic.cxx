@@ -100,6 +100,7 @@ AliAnalysisTaskXic::~AliAnalysisTaskXic()
     if (fOutputList2) {
         delete fOutputList2;     // at the end of your task, it is deleted from memory by calling this function
     }
+    if (fTrackCuts) delete fTrackCuts;
 
 }
 //_____________________________________________________________________________
@@ -118,6 +119,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->SetOwner(kTRUE);       // memory stuff: the list is owner of all objects it contains and will delete them
     fOutputList2->SetOwner(kTRUE);
 
+    fTrackCuts = new AliESDtrackCuts();
     //------------------------------------------------
     // QA histograms
     //------------------------------------------------
@@ -208,6 +210,19 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
+    // Parameters used for cuts.
+    double cutCosPa(0.998), cutcTau(2);
+	  double cutNImpact(-999), cutDCA(0.4);
+  	double cutBetheBloch(3);
+  	double cutMinNClustersTPC(70), cutMaxChi2PerClusterTPC(-999);
+  	double cutEta(0.8);
+
+    //Track Cuts set here
+    if(cutMinNClustersTPC != -999) (fTrackCuts->SetMinNClustersTPC(int(cutMinNClustersTPC)));
+    if(cutMaxChi2PerClusterTPC != -999) fTrackCuts->SetMaxChi2PerClusterTPC(cutMaxChi2PerClusterTPC);
+    fTrackCuts->SetAcceptKinkDaughters(kFALSE);
+    fTrackCuts->SetRequireTPCRefit(kTRUE);
+
     Int_t debugmode = 51; // for debuging, 101 for general debuging, 51 for specific debuging
     fESD = dynamic_cast<AliESDEvent*>(InputEvent());
     if (!fESD) {Printf("ERROR: fESD not available"); return;}
@@ -326,6 +341,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         if(debugmode > 100) AliInfo("03");
         //// Cuts
+        if(!(fTrackCuts->IsSelected(posTrack)) || !(fTrackCuts->IsSelected(negTrack))) {
+          lambdaCandidate = false;
+          antilambdaCandidate = false;
+        }
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         // is daughter particle okay?
@@ -343,6 +362,19 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         // DCA cut and CPA cut
+        if(cutCosPa != -999) {
+          if (lV0cosPointAngle < cutCosPa){
+            lambdaCandidate = false;
+            antilambdaCandidate = false;
+          }
+        }
+        // DCA between daughterscut
+		    if(cutDCA != -999) {
+          if(v0->GetDcaV0Daughters() > cutDCA) {
+            lambdaCandidate = false;
+            antilambdaCandidate = false;
+          }
+        }
         if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
         // TPC n Cluster cut for daughter particles
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
