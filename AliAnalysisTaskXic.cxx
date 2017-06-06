@@ -227,7 +227,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
     ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
-
+    AliInfo("after trigger selecction!");
     //------------------------------------------------
     //Step 2: Check for centrality for Pb-Pb
     //------------------------------------------------
@@ -235,7 +235,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fCentrality = fESD->GetCentrality();
     centralityV0M = fCentrality->GetCentralityPercentile("V0M");
     ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
-
+    AliInfo("after centrality check!");
     //------------------------------------------------
     //Step 3: Check for Vertex-Z position
     //------------------------------------------------
@@ -251,7 +251,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ((TH3F*)fOutputList->FindObject("fVertexDistXYZ"))->Fill(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
     ////////////******* DO Vertex-Z selecction *******////////////
     if (fabs(primaryVtx[2]) > 10.) return;
-
+    AliInfo("after Vertex-Z position check!");
     //------------------------------------------------
     //Step 4: Check for SPD Pileup
     //------------------------------------------------
@@ -275,6 +275,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
+    AliInfo("Starting V0 loop!");
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
