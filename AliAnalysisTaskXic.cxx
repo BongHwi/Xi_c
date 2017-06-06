@@ -365,6 +365,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t motha[3] = { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
         Double_t arpod[2] = {0, 0};
         if(debugmode == 1) AliInfo("04-4");
+        if(debugmode == 1) AliInfo("P Mass: %f, N Mass: %f",pTrack->GetMass(),nTrack->GetMass());
         if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
         if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
