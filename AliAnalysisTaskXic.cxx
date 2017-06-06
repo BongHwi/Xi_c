@@ -279,7 +279,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
-
+        AliInfo("01");
         //---> Fix On-the-Fly candidates, count how many swapped
         if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
             fHistSwappedV0Counter -> Fill( 1 );
@@ -291,7 +291,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Int_t    lOnFlyStatus = 0; // nv0sOn = 0, nv0sOff = 0;
         lOnFlyStatus = v0i->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
-
+        AliInfo("02");
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
         lPt = v0i->Pt();
@@ -313,7 +313,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
-
+        AliInfo("03");
         //// Cuts
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
@@ -337,7 +337,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-
+        AliInfo("04");
         // Mass Hypothesis for Lambda
         v0i->ChangeMassHypothesis(3122);
         double lInvMassLambda = 0.;
@@ -368,7 +368,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_after"))->Fill(arpod[1], arpod[0]);
-
+        AliInfo("05");
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
         // PID cut
         Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
@@ -380,7 +380,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-
+        AliInfo("06");
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
         if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
