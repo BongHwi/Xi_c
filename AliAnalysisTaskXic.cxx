@@ -346,6 +346,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
         if(debugmode > 50) AliInfo("daughter mass cut pass");
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
 
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
