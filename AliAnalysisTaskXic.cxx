@@ -277,6 +277,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     nv0s = fESD->GetNumberOfV0s();
     if(debugmode > 100) AliInfo("Starting V0 loop!");
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
+        bool lambdaCandidate = true;
+        bool antilambdaCandidate = true;
+        // keep only events of interest for fHistMLa plots
+        // from PWGLF/STRANGENESS/LambdaK0PbPb/AliAnalysisTaskLukeV0.cxx
+
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
         if(debugmode > 100) AliInfo("01");
@@ -295,6 +300,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
         lPt = v0i->Pt();
+        if (v0->GetEffMass(4,2) < 1.08 || v0->GetEffMass(4,2) > 1.2 || TMath::Abs(v0->Y(3122))>0.5 ) lambdaCandidate = false;
+        if (v0->GetEffMass(2,4) < 1.08 || v0->GetEffMass(2,4) > 1.2 || TMath::Abs(v0->Y(-3122))>0.5) antilambdaCandidate = false;
         // get daughter particle
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
@@ -338,10 +345,23 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
         if(debugmode > 100) AliInfo("04");
+
         // Mass Hypothesis for Lambda
-        v0i->ChangeMassHypothesis(3122);
+        //v0i->ChangeMassHypothesis(3122);
+        //sets assumed particle type of pos/neg daughters.
+		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
+		    int dPos = 0;
+		    int dNeg = 0;
+        if(!(v0->GetEffMass(dPos,dNeg) > 1.11 && v0->GetEffMass(dPos,dNeg) < 1.13)) continue;
         double lInvMassLambda = 0.;
-        lInvMassLambda = v0i->GetEffMass();
+        if(lambdaCandidate) {
+          lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
+          if(debugmode > 50) AliInfo("Lambda0 Case");
+        }
+        if(antilambdaCandidate) {
+          lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
+          if(debugmode > 50) AliInfo("Anti-Lambda0 Case");
+        }
         if(debugmode > 100) AliInfo("04-1");
 
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
