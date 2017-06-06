@@ -209,7 +209,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 {
     fESD = dynamic_cast<AliESDEvent*>(InputEvent());
     if (!fESD) {Printf("ERROR: fESD not available"); return;}
-
+    AliInfo("test!");
     //------------------------------------------------
     //Step 1: Check for selected Trigger
     //------------------------------------------------
