@@ -452,11 +452,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
 
-        ((TH1F*)fOutputList->FindObject("fHistCosPA")->Fill(lV0cosPointAngle));
-        ((TH1F*)fOutputList->FindObject("fHistDecayL")->Fill(decayLength));
-        ((TH1F*)fOutputList->FindObject("fHistTauLa")->Fill(cTauLa));
-        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos")->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal()));
-		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg")->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal()));
+        ((TH1F*)fOutputList->FindObject("fHistCosPA"))->Fill(lV0cosPointAngle);
+        ((TH1F*)fOutputList->FindObject("fHistDecayL"))->Fill(decayLength);
+        ((TH1F*)fOutputList->FindObject("fHistTauLa"))->Fill(cTauLa);
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
+		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
 
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
