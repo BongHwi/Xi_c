@@ -369,7 +369,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_after"))->Fill(arpod[1], arpod[0]);
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
         AliInfo("05");
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
         // PID cut
