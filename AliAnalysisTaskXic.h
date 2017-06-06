@@ -8,7 +8,7 @@
 #include "AliAnalysisTaskSE.h"
 #include "AliESDpid.h"
 
-class AliAnalysisTaskXic : public AliAnalysisTaskSE  
+class AliAnalysisTaskXic : public AliAnalysisTaskSE
 {
     public:
                                 AliAnalysisTaskXic();
@@ -22,7 +22,8 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
     private:
         AliESDEvent*            fESD;         //! input event
         TList*                  fOutputList;  //! output list
-	TList*                  fOutputList2; //! output list
+        AliESDtrackCuts*        fTrackCuts;			// Track cuts
+	      TList*                  fOutputList2; //! output list
         AliPIDResponse*         fPIDResponse; //! PID object
         AliCentrality*          fCentrality;  //! Centrality object
         AliESDtrackCuts        *fTrackCut;   //! ESD track cuts

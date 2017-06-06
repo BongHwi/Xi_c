@@ -57,6 +57,7 @@ void CheckChargeV0(AliESDv0 *v0);
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
     fOutputList(0x0),
+    fTrackCuts(0),
     fOutputList2(0x0),
     fPIDResponse(0x0),
     fCentrality(0),
@@ -71,6 +72,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
 AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(name),
     fESD(0x0),
     fOutputList(0x0),
+    fTrackCuts(0),
     fOutputList2(0x0),
     fPIDResponse(0x0),
     fCentrality(0),
@@ -206,7 +208,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 101; // for debuging, 101 for general debuging, 51 for specific debuging
+    Int_t debugmode = 51; // for debuging, 101 for general debuging, 51 for specific debuging
     fESD = dynamic_cast<AliESDEvent*>(InputEvent());
     if (!fESD) {Printf("ERROR: fESD not available"); return;}
     if(debugmode > 100) AliInfo("test!");
@@ -302,6 +304,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         lPt = v0i->Pt();
         if (v0i->GetEffMass(4,2) < 1.08 || v0i->GetEffMass(4,2) > 1.2 || TMath::Abs(v0i->Y(3122))>0.5 ) lambdaCandidate = false;
         if (v0i->GetEffMass(2,4) < 1.08 || v0i->GetEffMass(2,4) > 1.2 || TMath::Abs(v0i->Y(-3122))>0.5) antilambdaCandidate = false;
+        if(debugmode > 50 && lambdaCandidate) AliInfo("Lambda0 Case");
+        if(debugmode > 50 && antilambdaCandidate) AliInfo("Anti-Lambda0 Case");
         // get daughter particle
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
@@ -356,25 +360,17 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
             if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
-        
+
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
 		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
-		    int dPos = 0;
-		    int dNeg = 0;
-        dPos = 4;
-		    dNeg = 2;
+		    int dPos = 4;
+		    int dNeg = 2;
         if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
         double lInvMassLambda = 0.;
-        if(lambdaCandidate) {
-          lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
-          if(debugmode > 50) AliInfo("Lambda0 Case");
-        }
-        if(antilambdaCandidate) {
-          lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
-          if(debugmode > 50) AliInfo("Anti-Lambda0 Case");
-        }
+        if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
+        if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(debugmode > 100) AliInfo("04-1");
 
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
