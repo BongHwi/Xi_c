@@ -345,7 +345,18 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
         if(debugmode > 100) AliInfo("04");
-
+        // PID cut
+        Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
+        Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
+        if (lambdaCandidate) {
+          if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue; // Lambda case
+        }
+        if (antilambdaCandidate) {                                                  // Anti-Lambda case
+            Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
+            Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
+            if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
+        }
+        
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
@@ -373,23 +384,12 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
-        //((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
-        ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
-        // PID cut
-        Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
-        Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
-        if (pTrack->GetMass() > 0.9 && (nsigmaprP > 3.0 || nsigmapiN > 3.0) ) continue; // Lambda case
-        if (pTrack->GetMass() < 0.2) {                                                  // Anti-Lambda case
-            Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
-            Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
-            if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
-        }
+
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-        if(debugmode > 100) AliInfo("06");
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
-        if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
+        //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
         //}
     }
