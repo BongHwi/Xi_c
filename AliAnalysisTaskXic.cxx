@@ -339,6 +339,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        double decayLength = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
+  		  double cTauLa = decayLength*(v0i->GetEffMass(4,2))/(v0i->P());
+        double cTauLb = decayLength*(v0i->GetEffMass(2,4))/(v0i->P());
         if(debugmode > 100) AliInfo("03");
         //// Cuts
         if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
@@ -361,7 +364,14 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
         if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        // DCA cut and CPA cut
+        //psuedorapidity cut
+    		if(cutEta != -999) {
+    			if(TMath::Abs(posTrack->Eta()) > cutEta || TMath::Abs(negTrack->Eta())  >cutEta) {
+    				lambdaCandidate = false;
+    				antilambdaCandidate = false;
+    			}
+    		}
+        // CPA cut
         if(cutCosPa != -999) {
           if (lV0cosPointAngle < cutCosPa){
             lambdaCandidate = false;
@@ -375,23 +385,53 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             antilambdaCandidate = false;
           }
         }
-        if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
+        //lifetime cut
+    		if(cutcTau != -999){
+    			if(cTauLa < cutcTau){
+    				lambdaCandidate = false;
+    			}
+    			if(cTauLb < cutcTau){
+    				antilambdaCandidate = false;
+    			}
+    		}
+        // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
+    		if(cutBetheBloch != -999) {
+    			if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
+    			if(lambdaCandidate) {
+    				if(cutBetheBloch > 0) {
+    				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kProton)) > cutBetheBloch ) lambdaCandidate = false;
+    				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) lambdaCandidate = false;
+    				}
+    				if(cutBetheBloch == -4) {
+    					double beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+kMProton*kMProton))),2);
+    					double gamma2 = 1.0/(1.0-beta2);
+    					if(pTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) lambdaCandidate = false;
+            }
+          }
+    			if(antilambdaCandidate) {
+    				if(cutBetheBloch > 0) {
+    					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kProton)) > cutBetheBloch )
+    					{antilambdaCandidate = false;}
+    					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kPion)) > cutBetheBloch )
+    					{antilambdaCandidate = false;}
+    				}
+
+    				if(cutBetheBloch == -4) {
+    						double beta2 = TMath::Power((pNeg2/TMath::Sqrt((pNeg2*pNeg2+0.9*0.9))),2);
+    						double gamma2 = 1.0/(1.0-beta2);
+    						if(nTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) antilambdaCandidate = false;
+    				}
+    			}
+    		}
+        //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
         // TPC n Cluster cut for daughter particles
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
         if(debugmode > 100) AliInfo("04");
-        // PID cut
-        Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
-        Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
-        if (lambdaCandidate) {
-          if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue; // Lambda case
-        }
-        if (antilambdaCandidate) {                                                  // Anti-Lambda case
-            Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
-            Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
-            if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
-        }
+
+        //remove all non-candidates
+    		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
 
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
