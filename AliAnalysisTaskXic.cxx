@@ -282,7 +282,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     static Double_t k0Mass = 0.497611;
     static Double_t l0Mass = 1.115683;
     //static Double_t piMass = 0.13957;
-    //static Double_t prMass = 0.93827;
+    static Double_t prMass = 0.93827;
 
     // cut values
     Bool_t fkUseOnTheFly = kFALSE;
@@ -339,9 +339,18 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        // Decay length
         double decayLength = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
   		  double cTauLa = decayLength*(v0i->GetEffMass(4,2))/(v0i->P());
         double cTauLb = decayLength*(v0i->GetEffMass(2,4))/(v0i->P());
+        // momentums
+        double pTrackMomentum[3];
+		    double nTrackMomentum[3];
+        pTrack->GetConstrainedPxPyPz(pTrackMomentum);
+		    nTrack->GetConstrainedPxPyPz(nTrackMomentum);
+        double pPos2 = sqrt(pTrackMomentum[0]*pTrackMomentum[0]+pTrackMomentum[1]*pTrackMomentum[1]+pTrackMomentum[2]*pTrackMomentum[2]);
+        double pNeg2 = sqrt(nTrackMomentum[0]*nTrackMomentum[0]+nTrackMomentum[1]*nTrackMomentum[1]+nTrackMomentum[2]*nTrackMomentum[2]);
+
         if(debugmode > 100) AliInfo("03");
         //// Cuts
         if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
@@ -366,7 +375,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         //psuedorapidity cut
     		if(cutEta != -999) {
-    			if(TMath::Abs(posTrack->Eta()) > cutEta || TMath::Abs(negTrack->Eta())  >cutEta) {
+    			if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
     				lambdaCandidate = false;
     				antilambdaCandidate = false;
     			}
@@ -403,7 +412,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) lambdaCandidate = false;
     				}
     				if(cutBetheBloch == -4) {
-    					double beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+kMProton*kMProton))),2);
+    					double beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+prMass*prMass))),2);
     					double gamma2 = 1.0/(1.0-beta2);
     					if(pTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) lambdaCandidate = false;
             }
