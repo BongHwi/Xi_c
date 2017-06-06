@@ -353,10 +353,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         if(debugmode > 100) AliInfo("03");
         //// Cuts
-        if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
+        /*if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
           lambdaCandidate = false;
           antilambdaCandidate = false;
-        }
+        }*/
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         // is daughter particle okay?
