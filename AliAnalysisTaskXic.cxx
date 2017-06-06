@@ -321,6 +321,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         lOnFlyStatus = v0i->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
         if(debugmode > 100) AliInfo("02");
+
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
         lPt = v0i->Pt();
