@@ -52,7 +52,6 @@ using namespace std;            // std namespace: so you can do things like 'cou
 ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
 double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
-void GetArPod(Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arpod[2]);
 void CheckChargeV0(AliESDv0 *v0);
 
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
@@ -345,38 +344,14 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         lInvMassLambda = v0i->GetEffMass();
         if(debugmode > 100) AliInfo("04-1");
 
-        // Draw Armenteros-Podolanski Plot
-        // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
-        // Lambda -> P+ pi-  ---------------
-        AliKFParticle negKFKpim(*paramNegl, 211);
-        AliKFParticle posKFKprot(*paramPosl, 2212);
-        AliKFParticle lamKF(negKFKpim, posKFKprot);
-        lamKF.SetMassConstraint(l0Mass, 0.2 );
-        if(debugmode > 100) AliInfo("04-2");
-        // anit Lambda -> anti P- pi-  -----
-        AliKFParticle negKFKaprom(*paramNegl, 2212);
-        AliKFParticle posKFKapit(*paramPosl, 211);
-        AliKFParticle alamKF(negKFKaprom, posKFKapit);
-        alamKF.SetMassConstraint(l0Mass, 0.2 );
-        if(debugmode > 100) AliInfo("04-3");
-        Double_t posp[3] = { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
-        Double_t negp[3] = { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
-        Double_t moth[3] = { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
-        Double_t motha[3] = { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
-        Double_t arpod[2] = {0, 0};
-        if(debugmode > 100) AliInfo("04-4");
-        if(debugmode > 50) AliInfo(Form("P Mass: %f, N Mass: %f",pTrack->GetMass(),nTrack->GetMass()));
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
         if(debugmode > 50) AliInfo("daughter mass cut pass");
-        if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
-        if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
-	//((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
+
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
-        if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
+        if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
         //((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
         // PID cut
@@ -413,26 +388,6 @@ double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz)
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2)
 {
     return Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2;
-}
-void GetArPod( Double_t pos[3], Double_t neg[3], Double_t moth[3],  Double_t arpod[2] ) {
-
-    //from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov
-
-    TVector3 momentumVectorPositiveKF(pos[0], pos[1], pos[2]);
-    TVector3 momentumVectorNegativeKF(neg[0], neg[1], neg[2]);
-    TVector3 vecV0(moth[0], moth[1], moth[2]);
-
-    Float_t thetaV0pos = TMath::ACos(( momentumVectorPositiveKF * vecV0) / (momentumVectorPositiveKF.Mag() * vecV0.Mag()));
-    Float_t thetaV0neg = TMath::ACos(( momentumVectorNegativeKF * vecV0) / (momentumVectorNegativeKF.Mag() * vecV0.Mag()));
-
-    Float_t alfa = ((momentumVectorPositiveKF.Mag()) * TMath::Cos(thetaV0pos) - (momentumVectorNegativeKF.Mag()) * TMath::Cos(thetaV0neg)) /
-                   ((momentumVectorPositiveKF.Mag()) * TMath::Cos(thetaV0pos) + (momentumVectorNegativeKF.Mag()) * TMath::Cos(thetaV0neg)) ;
-
-    Float_t qt = momentumVectorPositiveKF.Mag() * TMath::Sin(thetaV0pos);
-
-    arpod[0] = qt;
-    arpod[1] = alfa;
-
 }
 void CheckChargeV0(AliESDv0 *v0)
 {
