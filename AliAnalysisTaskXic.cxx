@@ -118,48 +118,10 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->SetOwner(kTRUE);       // memory stuff: the list is owner of all objects it contains and will delete them
     fOutputList2->SetOwner(kTRUE);
 
-    // example of a histogram
-    TH1F *fMultDist = new TH1F("fMultDist", "Multiplicity Distribution", 200, 0, 20000);
-    fMultDist->GetXaxis()->SetTitle("Multiplicity");
-    fOutputList->Add(fMultDist);
-
-    TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_kaon);
-    TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_lambda);
-
-
-    TH1F *fInvLambda_before = new TH1F("fInvLambda_before", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambda_before->GetXaxis()->SetTitle("fInvLambda_before");
-    fOutputList->Add(fInvLambda_before);
-
-    TH1F *fInvLambda = new TH1F("fInvLambda", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambda->GetXaxis()->SetTitle("fInvLambda");
-    fOutputList->Add(fInvLambda);
-    TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
-    fOutputList->Add(fInvK0Short);
-    TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
-    fOutputList->Add(fInvK0Short_beforePID);
-    TH1F *fInvLambda_beforePID = new TH1F("fInvLambda_beforePID", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
-    fInvLambda_beforePID->GetXaxis()->SetTitle("fInvLambda_beforePID");
-    fOutputList->Add(fInvLambda_beforePID);
-
-    TH1F *fInvLambdaCut = new TH1F("fInvLambdaCut", "Invariant mass distribution of Lambda after mass window cut", 400, 1.0, 1.2);
-    fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
-    fOutputList->Add(fInvLambdaCut);
-    TH1F *fInvK0ShortCut = new TH1F("fInvK0ShortCut", "Invariant mass distribution of K0s after mass window cut", 400, 0.3, 0.7);
-    fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
-    fOutputList->Add(fInvK0ShortCut);
-
-    if (! fHistSwappedV0Counter) {
-        fHistSwappedV0Counter = new TH1F("fHistSwappedV0Counter",
-                                         "Swap or not histo;Swapped (1) or not (0); count",
-                                         2, 0, 2);
-        fOutputList->Add(fHistSwappedV0Counter);
-    }
-
+    //------------------------------------------------
+    // QA histograms
+    //------------------------------------------------
+    // Deafult Analysis setup
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
     fOutputList->Add(hEventSelecInfo);
     hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
@@ -169,19 +131,55 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     hEventSelecInfo->GetXaxis()->SetBinLabel(5, "kINT7");
     hEventSelecInfo->GetXaxis()->SetBinLabel(6, "kAny");
     hEventSelecInfo->GetXaxis()->SetBinLabel(7, "kPhysicsALL");
-
-
     TH1F *hCentrality = new TH1F("hCentrality", "Centrality", 100, 0, 100);
     hCentrality->GetXaxis()->SetTitle("Centrality");
     fOutputList->Add(hCentrality);
-
-
+    TH1F *fMultDist = new TH1F("fMultDist", "Multiplicity Distribution", 200, 0, 20000);
+    fMultDist->GetXaxis()->SetTitle("Multiplicity");
+    fOutputList->Add(fMultDist);
     TH3F *fVertexDistXYZ = new TH3F("fVertexDistXYZ", "Vertex Distribution", 20, -1, 1, 20, -1, 1, 60, -30, 30);
     fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
     fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
     fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
     fOutputList->Add(fVertexDistXYZ);
 
+    // Armenteros-Podolanski Plot
+    TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
+    fOutputList->Add(fArmPod_kaon);
+    TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
+    fOutputList->Add(fArmPod_lambda);
+    TH2F *fArmPod_lambda_cut = new TH2F("fArmPod_lambda_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
+    fOutputList->Add(fArmPod_lambda);
+
+    // K0s
+    TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
+    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
+    fOutputList->Add(fInvK0Short);
+    TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
+    fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
+    fOutputList->Add(fInvK0Short_beforePID);
+    TH1F *fInvK0ShortCut = new TH1F("fInvK0ShortCut", "Invariant mass distribution of K0s after mass window cut", 400, 0.3, 0.7);
+    fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
+    fOutputList->Add(fInvK0ShortCut);
+    // Lambda0
+    TH1F *fInvLambda = new TH1F("fInvLambda", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
+    fInvLambda->GetXaxis()->SetTitle("fInvLambda");
+    fOutputList->Add(fInvLambda);
+    TH1F *fInvLambda_beforePID = new TH1F("fInvLambda_beforePID", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
+    fInvLambda_beforePID->GetXaxis()->SetTitle("fInvLambda_beforePID");
+    fOutputList->Add(fInvLambda_beforePID);
+    TH1F *fInvLambdaCut = new TH1F("fInvLambdaCut", "Invariant mass distribution of Lambda after mass window cut", 400, 1.0, 1.2);
+    fInvLambdaCut->GetXaxis()->SetTitle("fInvLambdaCut");
+    fOutputList->Add(fInvLambdaCut);
+
+    if (! fHistSwappedV0Counter) {
+        fHistSwappedV0Counter = new TH1F("fHistSwappedV0Counter",
+                                         "Swap or not histo;Swapped (1) or not (0); count",
+                                         2, 0, 2);
+        fOutputList->Add(fHistSwappedV0Counter);
+    }
+
+    // Analysis Results
     TH2F *hInvMassWithPt = new TH2F("hInvMassWithPt", "Invariant mass distribution vs Pt", 1000, 2.0, 3.0, 100, 0, 10);
     fOutputList2->Add(hInvMassWithPt);
     TH1F *hInvMass = new TH1F("hInvMass", "Invariant mass distribution", 1000, 2.0, 3.0);
@@ -202,52 +200,34 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     AliAnalysisManager *man = AliAnalysisManager::GetAnalysisManager();
     AliInputEventHandler* inputHandler = (AliInputEventHandler*) (man->GetInputEventHandler());
     fPIDResponse = inputHandler->GetPIDResponse();
-
     if (!fPIDResponse) AliError ("No PID");
 
-
-
-    PostData(1, fOutputList);           // postdata will notify the analysis manager of changes / updates to the
-    // fOutputList object. the manager will in the end take care of writing your output to file
-    // so it needs to know what's in the output
+    PostData(1, fOutputList);
     PostData(2, fOutputList2);
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    // user exec
-    // this function is called once for each event
-    // the manager will take care of reading the events from file, and with the static function InputEvent() you
-    // have access to the current event.
-    // once you return from the UserExec function, the manager will retrieve the next event from the chain
-    fESD = dynamic_cast<AliESDEvent*>(InputEvent());    // get an event (called fESD) from the input file
-    // there's another event format (ESD) which works in a similar wya
-    // but is more cpu/memory unfriendly. for now, we'll stick with ESD's
-    if (!fESD) {Printf("ERROR: fESD not available"); return;} // if the pointer to the event is empty (getting it failed) skip this event
-    ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks()); // # of tracks --> multiplicity distribution
-
+    fESD = dynamic_cast<AliESDEvent*>(InputEvent());
+    if (!fESD) {Printf("ERROR: fESD not available"); return;}
 
     //------------------------------------------------
     //Step 1: Check for selected Trigger
     //------------------------------------------------
     Bool_t isSelectedMB = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & AliVEvent::kMB);
     if (isSelectedMB) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(1);
-
     Bool_t isSelectedkCentral = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & AliVEvent::kCentral);
     if (isSelectedkCentral) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(2);
-
     Bool_t isSelectedkSemiCentral = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & (AliVEvent::kSemiCentral));
     if (isSelectedkSemiCentral) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(3);
-
     Bool_t isSelectedINT7 = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kINT7);
     if (isSelectedINT7) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(4);
-
     Bool_t isSelected = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kAny);
     if (isSelected) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(5);
-
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
+    ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
 
     //------------------------------------------------
     //Step 2: Check for centrality for Pb-Pb
@@ -257,26 +237,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     centralityV0M = fCentrality->GetCentralityPercentile("V0M");
     ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
 
-
-    // Example of GetStandardITSTPCTrackCuts
-    fTrackCut = new AliESDtrackCuts();
-    fTrackCut->SetPtRange(.15, 100000000); // min. pT cut //1.
-    fTrackCut->SetAcceptKinkDaughters(kFALSE); //2.
-    fTrackCut->SetRequireTPCRefit(kTRUE);     //3.
-    fTrackCut->SetMaxChi2PerClusterTPC(4);    //4.
-    fTrackCut->SetMinNClustersTPC(70);        //5. TPC nclus will be changed in order to performed systematic.
-    //fTrackCut->SetEtaRange(-0.8, +0.8);       //6.
-    //fTrackCut->SetMaxDCAToVertexZ(2);           //7. DCAz cut
-    //fTrackCut->SetMaxDCAToVertexXYPtDep("1.");  //8. DCAr cut
-
-
     //------------------------------------------------
     //Step 3: Check for Vertex-Z position
     //------------------------------------------------
     const AliESDVertex *PrimaryVertexESD;
-    PrimaryVertexESD = fESD->GetPrimaryVertex(); // call primary vertex from ESD
-    //  if(!PrimaryVertexESD) return;
-// if(PrimaryVertexESD->GetNContributors() < 1) return;
+    PrimaryVertexESD = fESD->GetPrimaryVertex();
+    if(!PrimaryVertexESD) return;
+    if(PrimaryVertexESD->GetNContributors() < 1) return;
 
     Double_t primaryVtx[3] = {0};
     primaryVtx[0] = PrimaryVertexESD->GetX(); // call primary vertex position of X
@@ -291,39 +258,28 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     //------------------------------------------------
     if (fESD->IsPileupFromSPD()) return; // Reject Pile-up events
 
+    //------------------------------------------------
+    //Step 5: V0 Loop
+    //------------------------------------------------
     Double_t  lMagneticField = fESD->GetMagneticField();
+    // mass constant
+    static Double_t k0Mass = 0.497611;
+    static Double_t l0Mass = 1.115683;
+    //static Double_t piMass = 0.13957;
+    //static Double_t prMass = 0.93827;
 
-    double lInvMassLambda = 0.;
-    double lInvMassK0Short = 0.0;
-    Double_t MassLam = 1.115683 ;
-
-    static Double_t k0Mass = 0.497611;      static Double_t l0Mass = 1.115683;
-    static Double_t piMass = 0.13957;       static Double_t protonMass = 0.93827;
-
-    Double_t fMinV0Pt = 0.15;  Double_t fMaxV0Pt = 1.E10;    Double_t lV0Radius = 0, lPt = 0;
-    Double_t fQt = 0;       Double_t falpha = 0;
-    Double_t thetaV0pos, thetaV0neg;
-    TVector3 momentumVectorPositiveKF, momentumVectorNegativeKF, vecV0;
-
-    Double_t V0momK0ShortDaughterN[3] = {.0, .0, .0};
-    Double_t V0momK0ShortDaughterP[3] = {.0, .0, .0};
-    Double_t V0momLambda0DaughterN[3] = {.0, .0, .0};
-    Double_t V0momLambda0DaughterP[3] = {.0, .0, .0};
-
-    Double_t tV0momi[3];    Double_t tV0momj[3];    Double_t tV0mom_result[3];
-
-    Double_t ei = 0.;       Double_t ej = 0.;
-    Double_t angle = 0.;    Double_t fPt_result = 0.;
-    Double_t  fMass = 0.;
+    // cut values
     Bool_t fkUseOnTheFly = kFALSE;
+    Double_t fMinV0Pt = 0.15;
+    Double_t fMaxV0Pt = 1.E10;
+
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
-
-    for (Int_t iV0 = 0; iV0 < nv0s; iV0++)
-    {   // This is the begining of the V0 loop for first V0(K0Short)
+    for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
+
         //---> Fix On-the-Fly candidates, count how many swapped
         if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
             fHistSwappedV0Counter -> Fill( 1 );
@@ -332,91 +288,98 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         }
         if ( fkUseOnTheFly ) CheckChargeV0(v0i);
 
-        Int_t    lOnFlyStatus = 0;// nv0sOn = 0, nv0sOff = 0;
+        Int_t    lOnFlyStatus = 0; // nv0sOn = 0, nv0sOff = 0;
         lOnFlyStatus = v0i->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
 
+        //// Get V0 informations for the cuts
+        Double_t lPt = 0;
         lPt = v0i->Pt();
-        if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-
+        // get daughter particle
         UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
         UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
-
         AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
         AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
         const AliExternalTrackParam * paramPosl = v0i->GetParamP();
         const AliExternalTrackParam * paramNegl = v0i->GetParamN();
+        // Cosine Pointing Angle and DCA Values
+        Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
+        Double_t lV0Position[3];
+        Double_t lV0Radius = 0
+        v0i->GetXYZ(lV0Position[0], lV0Position[1], lV0Position[2]);
+        Double_t lV0Radius      = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
+        Double_t lDcaPosToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
+        Double_t lDcaNegToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
+        Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
+        Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
+        v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
 
+        //// Cuts
+        // Pt cut for mother particle
+        if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
+        // is daughter particle okay?
         if (!pTrack || !nTrack) {
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
+        // Like sign cut
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
         }
-        //GetKinkIndex condition
+        // Kink daughter cut
         if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
-
         // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
         if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-
-        // Cosine Pointing Angle and DCA Values
-        Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
-
-        Double_t lV0Position[3];
-        v0i->GetXYZ(lV0Position[0], lV0Position[1], lV0Position[2]);
-        Double_t  lV0Radius      = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
-        Double_t  lDcaPosToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
-        Double_t lDcaNegToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
-        Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
-
+        // DCA cut and CPA cut
         if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
-
+        // TPC n Cluster cut for daughter particles
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        // find new v0 for Lambda
+
+        // Mass Hypothesis for Lambda
         v0i->ChangeMassHypothesis(3122);
-        v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        double lInvMassLambda = 0.;
         lInvMassLambda = v0i->GetEffMass();
+
         // Draw Armenteros-Podolanski Plot
         // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
-
         // Lambda -> P+ pi-  ---------------
         AliKFParticle negKFKpim(*paramNegl, 211);
         AliKFParticle posKFKprot(*paramPosl, 2212);
         AliKFParticle lamKF(negKFKpim, posKFKprot);
-        lamKF.SetMassConstraint(MassLam, 0.2 );
+        lamKF.SetMassConstraint(l0mass, 0.2 );
 
-        //printf("this v0 is antilambda");
+        // anit Lambda -> anti P- pi-  -----
         AliKFParticle negKFKaprom(*paramNegl, 2212);
         AliKFParticle posKFKapit(*paramPosl, 211);
         AliKFParticle alamKF(negKFKaprom, posKFKapit);
-        alamKF.SetMassConstraint(MassLam, 0.2 );
+        alamKF.SetMassConstraint(l0mass, 0.2 );
 
         Double_t posp[3] = { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
         Double_t negp[3] = { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
         Double_t moth[3] = { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
         Double_t motha[3] = { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
         Double_t arpod[2] = {0, 0};
-        if (pTrack->GetMass() > 0.5 && nTrack->GetMass() < 0.5) GetArPod( posp, negp, moth, arpod );
-        if (pTrack->GetMass() < 0.5 && nTrack->GetMass() > 0.5) GetArPod( posp, negp, motha, arpod );
-
+        if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
+        if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
+        // Armenteros-Podolansiki Cut
+        if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_after"))->Fill(arpod[1], arpod[0]);
 
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
+        // PID cut
         Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
         Float_t nsigmapiN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kPion );
-        if (pTrack->GetMass() > 0.5) if (nsigmaprP > 3.0 || nsigmapiN > 3.0) continue;
-        if (pTrack->GetMass() < 0.5) {
+        if (pTrack->GetMass() > 0.9 && (nsigmaprP > 3.0 || nsigmapiN > 3.0) ) continue; // Lambda case
+        if (pTrack->GetMass() < 0.2) {                                                  // Anti-Lambda case
             Float_t nsigmaprN = fPIDResponse->NumberOfSigmasTPC( nTrack, AliPID::kProton );
             Float_t nsigmapiP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kPion );
             if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-        if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue; //Armenteros-Podolansiki Cut
-        ((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(arpod[1], arpod[0]);
 
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
         if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
