@@ -14,9 +14,8 @@
  **************************************************************************/
 
 /* AliAnaysisTaskXic
+ * test for commit
  *
- * empty task which can serve as a starting point for building an analysis
- * as an example, one histogram is filled
  */
 
 #include <iostream>
