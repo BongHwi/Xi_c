@@ -342,7 +342,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         v0i->ChangeMassHypothesis(3122);
         double lInvMassLambda = 0.;
         lInvMassLambda = v0i->GetEffMass();
-
+        AliInfo("04-1");
         // Draw Armenteros-Podolanski Plot
         // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
         // Lambda -> P+ pi-  ---------------
@@ -350,21 +350,23 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliKFParticle posKFKprot(*paramPosl, 2212);
         AliKFParticle lamKF(negKFKpim, posKFKprot);
         lamKF.SetMassConstraint(l0Mass, 0.2 );
-
+        AliInfo("04-2");
         // anit Lambda -> anti P- pi-  -----
         AliKFParticle negKFKaprom(*paramNegl, 2212);
         AliKFParticle posKFKapit(*paramPosl, 211);
         AliKFParticle alamKF(negKFKaprom, posKFKapit);
         alamKF.SetMassConstraint(l0Mass, 0.2 );
-
+        AliInfo("04-3");
         Double_t posp[3] = { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
         Double_t negp[3] = { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
         Double_t moth[3] = { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
         Double_t motha[3] = { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
         Double_t arpod[2] = {0, 0};
+        AliInfo("04-4");
         if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
         if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
+        AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_after"))->Fill(arpod[1], arpod[0]);
