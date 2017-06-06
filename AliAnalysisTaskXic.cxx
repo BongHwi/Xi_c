@@ -210,7 +210,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 51; // for debuging, 101 for general debuging, 51 for specific debuging
+    Int_t debugmode = 11; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
     // Parameters used for cuts.
     double cutCosPa(0.998), cutcTau(2);
 	  double cutNImpact(-999), cutDCA(0.4);
@@ -448,7 +448,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         //remove all non-candidates
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-
+        if(debugmode > 10) AliInfo("v0 survived!");
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
