@@ -399,6 +399,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         }
         if((lambdaCandidate == true || antilambdaCandidate == true) && debugmode > 50) AliInfo("DCA cut!");
         //lifetime cut
+        /*
     		if(cutcTau != -999){
     			if(cTauLa < cutcTau){
     				lambdaCandidate = false;
@@ -406,7 +407,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     			if(cTauLb < cutcTau){
     				antilambdaCandidate = false;
     			}
-    		}
+    		}*/
         if((lambdaCandidate == true || antilambdaCandidate == true) && debugmode > 50) AliInfo("Lifetime cut!");
         // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
     		if(cutBetheBloch != -999) {
