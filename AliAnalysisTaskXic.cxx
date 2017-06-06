@@ -370,11 +370,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 50) AliInfo("daughter mass cut pass");
         if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
         if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
+	//((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
+        //((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
+        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
         // PID cut
