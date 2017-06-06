@@ -207,7 +207,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 0; // for debuging
+    Int_t debugmode = 1; // for debuging
     fESD = dynamic_cast<AliESDEvent*>(InputEvent());
     if (!fESD) {Printf("ERROR: fESD not available"); return;}
     if(debugmode == 1) AliInfo("test!");
