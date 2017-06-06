@@ -369,11 +369,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
         }
-        // Kink daughter cut
-        if ( pTrack->GetKinkIndex(0) > 0 || nTrack->GetKinkIndex(0) > 0 ) continue;
-        // TPC refit condition (done during reconstruction for Offline but not for On-the-fly)
-        if ( !(pTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
-        if ( !(nTrack->GetStatus() & AliESDtrack::kTPCrefit)) continue;
         //psuedorapidity cut
     		if(cutEta != -999) {
     			if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
