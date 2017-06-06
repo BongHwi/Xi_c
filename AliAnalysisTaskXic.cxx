@@ -341,7 +341,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         if(debugmode > 100) AliInfo("03");
         //// Cuts
-        if(!(fTrackCuts->IsSelected(posTrack)) || !(fTrackCuts->IsSelected(negTrack))) {
+        if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
           lambdaCandidate = false;
           antilambdaCandidate = false;
         }
@@ -370,7 +370,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         }
         // DCA between daughterscut
 		    if(cutDCA != -999) {
-          if(v0->GetDcaV0Daughters() > cutDCA) {
+          if(v0i->GetDcaV0Daughters() > cutDCA) {
             lambdaCandidate = false;
             antilambdaCandidate = false;
           }
