@@ -148,7 +148,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
     fOutputList->Add(fArmPod_lambda);
     TH2F *fArmPod_lambda_cut = new TH2F("fArmPod_lambda_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
-    fOutputList->Add(fArmPod_lambda);
+    fOutputList->Add(fArmPod_lambda_cut);
 
     // K0s
     TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
