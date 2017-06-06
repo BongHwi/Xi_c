@@ -207,10 +207,10 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 1; // for debuging
+    Int_t debugmode = 51; // for debuging, 101 for general debuging, 51 for specific debuging
     fESD = dynamic_cast<AliESDEvent*>(InputEvent());
     if (!fESD) {Printf("ERROR: fESD not available"); return;}
-    if(debugmode == 1) AliInfo("test!");
+    if(debugmode > 100) AliInfo("test!");
     //------------------------------------------------
     //Step 1: Check for selected Trigger
     //------------------------------------------------
@@ -228,7 +228,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
     ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
-    if(debugmode == 1) AliInfo("after trigger selecction!");
+    if(debugmode > 100) AliInfo("after trigger selecction!");
     //------------------------------------------------
     //Step 2: Check for centrality for Pb-Pb
     //------------------------------------------------
@@ -236,7 +236,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fCentrality = fESD->GetCentrality();
     centralityV0M = fCentrality->GetCentralityPercentile("V0M");
     ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
-    if(debugmode == 1) AliInfo("after centrality check!");
+    if(debugmode > 100) AliInfo("after centrality check!");
     //------------------------------------------------
     //Step 3: Check for Vertex-Z position
     //------------------------------------------------
@@ -252,7 +252,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     ((TH3F*)fOutputList->FindObject("fVertexDistXYZ"))->Fill(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
     ////////////******* DO Vertex-Z selecction *******////////////
     if (fabs(primaryVtx[2]) > 10.) return;
-    if(debugmode == 1) AliInfo("after Vertex-Z position check!");
+    if(debugmode > 100) AliInfo("after Vertex-Z position check!");
     //------------------------------------------------
     //Step 4: Check for SPD Pileup
     //------------------------------------------------
@@ -276,11 +276,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
-    if(debugmode == 1) AliInfo("Starting V0 loop!");
+    if(debugmode > 100) AliInfo("Starting V0 loop!");
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
-        if(debugmode == 1) AliInfo("01");
+        if(debugmode > 100) AliInfo("01");
         //---> Fix On-the-Fly candidates, count how many swapped
         if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
             fHistSwappedV0Counter -> Fill( 1 );
@@ -292,7 +292,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Int_t    lOnFlyStatus = 0; // nv0sOn = 0, nv0sOff = 0;
         lOnFlyStatus = v0i->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
-        if(debugmode == 1) AliInfo("02");
+        if(debugmode > 100) AliInfo("02");
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
         lPt = v0i->Pt();
@@ -314,7 +314,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
-        if(debugmode == 1) AliInfo("03");
+        if(debugmode > 100) AliInfo("03");
         //// Cuts
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
@@ -338,12 +338,12 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        if(debugmode == 1) AliInfo("04");
+        if(debugmode > 100) AliInfo("04");
         // Mass Hypothesis for Lambda
         v0i->ChangeMassHypothesis(3122);
         double lInvMassLambda = 0.;
         lInvMassLambda = v0i->GetEffMass();
-        if(debugmode == 1) AliInfo("04-1");
+        if(debugmode > 100) AliInfo("04-1");
 
         // Draw Armenteros-Podolanski Plot
         // from PWGGA/Hyperon/AliAnalysisTaskSigma0.cxx by Alexander Borissov.
@@ -352,28 +352,30 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliKFParticle posKFKprot(*paramPosl, 2212);
         AliKFParticle lamKF(negKFKpim, posKFKprot);
         lamKF.SetMassConstraint(l0Mass, 0.2 );
-        if(debugmode == 1) AliInfo("04-2");
+        if(debugmode > 100) AliInfo("04-2");
         // anit Lambda -> anti P- pi-  -----
         AliKFParticle negKFKaprom(*paramNegl, 2212);
         AliKFParticle posKFKapit(*paramPosl, 211);
         AliKFParticle alamKF(negKFKaprom, posKFKapit);
         alamKF.SetMassConstraint(l0Mass, 0.2 );
-        if(debugmode == 1) AliInfo("04-3");
+        if(debugmode > 100) AliInfo("04-3");
         Double_t posp[3] = { pTrack->Px(),  pTrack->Py(),  pTrack->Pz() };
         Double_t negp[3] = { nTrack->Px(),  nTrack->Py(),  nTrack->Pz() };
         Double_t moth[3] = { lamKF.GetPx(), lamKF.GetPy(), lamKF.GetPz() };
         Double_t motha[3] = { alamKF.GetPx(), alamKF.GetPy(), alamKF.GetPz() };
         Double_t arpod[2] = {0, 0};
-        if(debugmode == 1) AliInfo("04-4");
-        if(debugmode == 1) AliInfo(Form("P Mass: %f, N Mass: %f",pTrack->GetMass(),nTrack->GetMass()));
+        if(debugmode > 100) AliInfo("04-4");
+        if(debugmode > 50) AliInfo(Form("P Mass: %f, N Mass: %f",pTrack->GetMass(),nTrack->GetMass()));
+        if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
+        if(debugmode > 50) AliInfo("daughter mass cut pass");
         if (pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2) GetArPod( posp, negp, moth, arpod );
         if (pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9) GetArPod( posp, negp, motha, arpod );
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(arpod[1], arpod[0]);
-        if(debugmode == 1) AliInfo("04-5");
+        if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * arpod[1]) < arpod[0]) continue;
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(arpod[1], arpod[0]);
-        if(debugmode == 1) AliInfo("05");
+        if(debugmode > 100) AliInfo("05");
         ((TH1F*)fOutputList->FindObject("fInvLambda_beforePID"))->Fill(lInvMassLambda); // Before PID
         // PID cut
         Float_t nsigmaprP = fPIDResponse->NumberOfSigmasTPC( pTrack, AliPID::kProton );
@@ -385,7 +387,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             if (nsigmaprN > 3.0 || nsigmapiP > 3.0) continue;
         }
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-        if(debugmode == 1) AliInfo("06");
+        if(debugmode > 100) AliInfo("06");
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
         if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
