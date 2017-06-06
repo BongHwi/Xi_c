@@ -213,7 +213,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Int_t debugmode = 11; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
     // Parameters used for cuts.
     double cutCosPa(0.998), cutcTau(2);
-	  double cutNImpact(-999), cutDCA(0.4);
+	  double cutNImpact(-999), cutDCA(0.9);
   	double cutBetheBloch(3);
   	double cutMinNClustersTPC(70), cutMaxChi2PerClusterTPC(-999);
   	double cutEta(0.8);
