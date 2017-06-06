@@ -210,7 +210,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 101; // for debuging, 101 for general debuging, 51 for specific debuging
+    Int_t debugmode = 51; // for debuging, 101 for general debuging, 51 for specific debuging
     // Parameters used for cuts.
     double cutCosPa(0.998), cutcTau(2);
 	  double cutNImpact(-999), cutDCA(0.4);
@@ -353,10 +353,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         if(debugmode > 100) AliInfo("03");
         //// Cuts
-        /*if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
+        if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
           lambdaCandidate = false;
           antilambdaCandidate = false;
-        }*/
+        }
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("Track cut!");
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         // is daughter particle okay?
@@ -380,6 +381,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				antilambdaCandidate = false;
     			}
     		}
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("Eta cut!");
         // CPA cut
         if(cutCosPa != -999) {
           if (lV0cosPointAngle < cutCosPa){
@@ -387,6 +389,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             antilambdaCandidate = false;
           }
         }
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("CPA cut!");
         // DCA between daughterscut
 		    if(cutDCA != -999) {
           if(v0i->GetDcaV0Daughters() > cutDCA) {
@@ -394,6 +397,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             antilambdaCandidate = false;
           }
         }
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("DCA cut!");
         //lifetime cut
     		if(cutcTau != -999){
     			if(cTauLa < cutcTau){
@@ -403,6 +407,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				antilambdaCandidate = false;
     			}
     		}
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("Lifetime cut!");
         // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
     		if(cutBetheBloch != -999) {
     			if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
@@ -432,6 +437,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				}
     			}
     		}
+        if(lambdaCandidate == false && antilambdaCandidate == false && debugmode > 50) AliInfo("PID cut!");
         //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
         // TPC n Cluster cut for daughter particles
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
