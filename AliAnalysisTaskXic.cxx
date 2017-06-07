@@ -14,7 +14,7 @@
  **************************************************************************/
 
 /* AliAnaysisTaskXic
- * test for commit
+ * test for commit2
  *
  */
 
