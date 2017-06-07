@@ -462,7 +462,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(25);
         //remove all non-candidates
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(debugmode > 10) AliInfo("v0 survived!");
+        if(debugmode > 10) AliInfo("============v0 survived!============");
 
         ((TH1F*)fOutputList->FindObject("fHistCosPA"))->Fill(lV0cosPointAngle);
         ((TH1F*)fOutputList->FindObject("fHistDecayL"))->Fill(decayLength);
@@ -470,7 +470,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
 		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
 
-        //((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13.1);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(27);
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
@@ -478,21 +478,21 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 		    int dPos = 4;
 		    int dNeg = 2;
         if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(27);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(29);
         double lInvMassLambda = 0.;
         if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(debugmode > 100) AliInfo("04-1");
 
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(29);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(31);
         if(debugmode > 50) AliInfo("daughter mass cut pass");
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
 
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(31);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(33);
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
 
