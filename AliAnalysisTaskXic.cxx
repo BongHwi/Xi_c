@@ -124,7 +124,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     // QA histograms
     //------------------------------------------------
     // Deafult Analysis setup
-    TH1F *hNofV0 = new TH1F("hNofV0", "hNofV0", 10, 0, 40);
+    TH1F *hNofV0 = new TH1F("hNofV0", "hNofV0", 40, 0, 40);
       hNofV0->GetXaxis()->SetTitle("# of v0 through each cut");
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
       hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
@@ -492,7 +492,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(16.1);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(31);
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
 
