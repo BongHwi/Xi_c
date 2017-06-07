@@ -460,7 +460,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 100) AliInfo("04");
 
         //remove all non-candidates
-    		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+    		//if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
         ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(12);
 
@@ -483,7 +483,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(debugmode > 100) AliInfo("04-1");
 
-        //if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
+        if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
         ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(14);
         if(debugmode > 50) AliInfo("daughter mass cut pass");
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
