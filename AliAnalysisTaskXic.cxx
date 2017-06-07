@@ -476,7 +476,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
 		    int dPos = 4;
 		    int dNeg = 2;
-        if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
+        //if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
         ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13);
         double lInvMassLambda = 0.;
         if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
