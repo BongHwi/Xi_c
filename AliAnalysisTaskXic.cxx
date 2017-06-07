@@ -459,10 +459,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(11);
         if(debugmode > 100) AliInfo("04");
 
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(12);
         //remove all non-candidates
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(12);
 
         ((TH1F*)fOutputList->FindObject("fHistCosPA"))->Fill(lV0cosPointAngle);
         ((TH1F*)fOutputList->FindObject("fHistDecayL"))->Fill(decayLength);
