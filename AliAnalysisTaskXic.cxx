@@ -470,7 +470,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
 		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
 
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13.1);
+        //((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13.1);
         // Mass Hypothesis for Lambda
         //v0i->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
