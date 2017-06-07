@@ -311,7 +311,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         if (!v0i) continue;
-        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(1);
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(0);
         if(debugmode > 100) AliInfo("01");
         //---> Fix On-the-Fly candidates, count how many swapped
         if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
@@ -325,6 +325,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         lOnFlyStatus = v0i->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
         if(debugmode > 100) AliInfo("02");
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(1);
 
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
