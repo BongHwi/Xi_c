@@ -370,6 +370,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           lambdaCandidate = false;
           antilambdaCandidate = false;
         }
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Track cut!");
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
@@ -392,6 +393,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				antilambdaCandidate = false;
     			}
     		}
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Eta cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(11);
         // CPA cut
         if(cutCosPa != -999) {
@@ -400,6 +402,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             antilambdaCandidate = false;
           }
         }
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("CPA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13);
         // DCA between daughterscut
 		    if(cutDCA != -999) {
@@ -408,6 +411,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
             antilambdaCandidate = false;
           }
         }
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("DCA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(15);
         //lifetime cut
         /*
@@ -419,6 +423,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				antilambdaCandidate = false;
     			}
     		}*/
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Lifetime cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(17);
         // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
     		if(cutBetheBloch != -999) {
@@ -449,6 +454,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     				}
     			}
     		}
+        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(19);
         //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
         // TPC n Cluster cut for daughter particles
