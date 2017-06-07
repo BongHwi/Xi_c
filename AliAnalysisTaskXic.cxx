@@ -124,7 +124,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     // QA histograms
     //------------------------------------------------
     // Deafult Analysis setup
-    TH1F *hNofV0 = new TH1F("hNofV0", "hNofV0", 10, 0, 10);
+    TH1F *hNofV0 = new TH1F("hNofV0", "hNofV0", 10, 0, 20);
       hNofV0->GetXaxis()->SetTitle("# of v0 through each cut");
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
       hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
@@ -453,13 +453,16 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
         // TPC n Cluster cut for daughter particles
         if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(10);
         //Findable clusters > 0 condition
         if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(11);
         if(debugmode > 100) AliInfo("04");
 
         //remove all non-candidates
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("v0 survived!");
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(12);
 
         ((TH1F*)fOutputList->FindObject("fHistCosPA"))->Fill(lV0cosPointAngle);
         ((TH1F*)fOutputList->FindObject("fHistDecayL"))->Fill(decayLength);
@@ -474,18 +477,21 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 		    int dPos = 4;
 		    int dNeg = 2;
         if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13);
         double lInvMassLambda = 0.;
         if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
         if(debugmode > 100) AliInfo("04-1");
 
         if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(14);
         if(debugmode > 50) AliInfo("daughter mass cut pass");
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
 
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
+        ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(15);
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
 
