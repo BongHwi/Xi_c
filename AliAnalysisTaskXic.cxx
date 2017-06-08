@@ -739,10 +739,17 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         v0j->GetPxPyPz(tV0momj[0], tV0momj[1], tV0momj[2]);
         //// ---- Calculate inv. mass for Xi_c ---- ////
+        Double_t ei = 0.;
+        Double_t ej = 0.;
+        Double_t angle = 0.;
+        Double_t fMass = 0.;
+        Double_t fPt_result = 0.;
+
         ei = getEnergy(k0Mass, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(K0Short)
         ej = getEnergy(l0Mass, tV0momj[0], tV0momj[1], tV0momj[2]); // Energy of first particle(K0Short)
 
         angle = getAngle(tV0momi[0], tV0momi[1], tV0momi[2], tV0momj[0], tV0momj[1], tV0momj[2]);
+
         fMass = k0Mass * k0Mass + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
         if (fMass <= 0) continue;
         fMass = sqrt(fMass);
