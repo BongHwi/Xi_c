@@ -686,7 +686,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
         ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_k0s"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
             ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_k0s"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
-
+        if(debugmode > 10) AliInfo("============k0 qa histograms============");
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(27);
         // Mass Hypothesis for Lambda
         //v0j->ChangeMassHypothesis(3122);
@@ -702,18 +702,20 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(31);
         if(debugmode > 50) AliInfo("daughter mass cut pass");
         ((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
-
+        if(debugmode > 10) AliInfo("============ArmPod Kaon============");
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
         if (TMath::Abs(0.2 * v0j->AlphaV0()) > v0j->PtArmV0()) continue;
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(33);
         ((TH2F*)fOutputList->FindObject("fArmPod_kaon_cut"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
+        if(debugmode > 10) AliInfo("============ArmPod Kaon 2!============");
         if(debugmode > 100) AliInfo("05");
 
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
         ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0s);
         //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
+        if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
     }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
