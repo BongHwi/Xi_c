@@ -328,398 +328,399 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
     if(debugmode > 100) AliInfo("Starting V0 loop!");
-    for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
-        bool lambdaCandidate = true;
-        bool antilambdaCandidate = true;
+    for (Int_t jV0 = 0; jV0 < nv0s; jV0++){
+        bool kshortCandidate = true;
         // keep only events of interest for fHistMLa plots
         // from PWGLF/STRANGENESS/LambdaK0PbPb/AliAnalysisTaskLukeV0.cxx
 
-        AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
-        if (!v0i) continue;
-        if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(1);
+        AliESDv0 *v0j = ((AliESDEvent*)fESD)->GetV0(jV0);
+        if (!v0j) continue;
+        if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(1);
         if(debugmode > 100) AliInfo("01");
         //---> Fix On-the-Fly candidates, count how many swapped
-        if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
+        if ( v0j->GetParamN()->Charge() > 0 && v0j->GetParamP()->Charge() < 0 ) {
             fHistSwappedV0Counter -> Fill( 1 );
         } else {
             fHistSwappedV0Counter -> Fill( 0 );
         }
-        if ( fkUseOnTheFly ) CheckChargeV0(v0i);
+        if ( fkUseOnTheFly ) CheckChargeV0(v0j);
 
         Int_t    lOnFlyStatus = 0; // nv0sOn = 0, nv0sOff = 0;
-        lOnFlyStatus = v0i->GetOnFlyStatus();
+        lOnFlyStatus = v0j->GetOnFlyStatus();
         if (lOnFlyStatus == 0) continue;
         if(debugmode > 100) AliInfo("02");
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(3);
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(3);
 
         //// Get V0 informations for the cuts
         Double_t lPt = 0;
-        lPt = v0i->Pt();
-        if (v0i->GetEffMass(4,2) < 1.08 || v0i->GetEffMass(4,2) > 1.2 || TMath::Abs(v0i->Y(3122))>0.5 ) lambdaCandidate = false;
-        if (v0i->GetEffMass(2,4) < 1.08 || v0i->GetEffMass(2,4) > 1.2 || TMath::Abs(v0i->Y(-3122))>0.5) antilambdaCandidate = false;
-        if(debugmode > 50 && lambdaCandidate) AliInfo("Lambda0 Case");
-        if(debugmode > 50 && antilambdaCandidate) AliInfo("Anti-Lambda0 Case");
+        lPt = v0j->Pt();
+        if (v0j->GetEffMass(2,2) < 0.414 || v0j->GetEffMass(2,2) > 0.582 || TMath::Abs(v0j->Y(310))>0.5) kshortCandidate = false;
+
+        if(debugmode > 50 && kshortCandidate) AliInfo("K0s Case");
         // get daughter particle
-        UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
-        UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
+        UInt_t lKeyPos = (UInt_t)TMath::Abs(v0j->GetPindex());
+        UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0j->GetNindex());
         AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
         AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
-        const AliExternalTrackParam * paramPosl = v0i->GetParamP();
-        const AliExternalTrackParam * paramNegl = v0i->GetParamN();
-        // TPC nCluster
-        Int_t fTPCNcls = -100;
-        fTPCNcls = pTrack->GetTPCNcls();
+        const AliExternalTrackParam * paramPosl = v0j->GetParamP();
+        const AliExternalTrackParam * paramNegl = v0j->GetParamN();
         // Cosine Pointing Angle and DCA Values
-        Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
-        Double_t lV0Position[3];
-        Double_t lV0Radius = 0;
-        v0i->GetXYZ(lV0Position[0], lV0Position[1], lV0Position[2]);
-        lV0Radius = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
+        Double_t kV0cosPointAngle = v0j->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
+        Double_t kV0Position[3];
+        Double_t kV0Radius = 0;
+        v0j->GetXYZ(kV0Position[0], kV0Position[1], kV0Position[2]);
+        kV0Radius = TMath::Sqrt(kV0Position[0] * kV0Position[0] + kV0Position[1] * kV0Position[1]);
         Double_t lDcaPosToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
         Double_t lDcaNegToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
-        Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
+        Double_t lDcaV0Daughters = v0j->GetDcaV0Daughters();
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
-        v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        v0j->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         // Decay length
-        double decayLength = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
-  		  double cTauLa = decayLength*(v0i->GetEffMass(4,2))/(v0i->P());
-        double cTauLb = decayLength*(v0i->GetEffMass(2,4))/(v0i->P());
+        double decayLength2 = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
+        double cTauK0 = decayLength2*(v0j->GetEffMass(2,2))/(v0j->P());
         // momentums
         double pTrackMomentum[3];
-		    double nTrackMomentum[3];
+        double nTrackMomentum[3];
         pTrack->GetConstrainedPxPyPz(pTrackMomentum);
-		    nTrack->GetConstrainedPxPyPz(nTrackMomentum);
+            nTrack->GetConstrainedPxPyPz(nTrackMomentum);
         double pPos2 = sqrt(pTrackMomentum[0]*pTrackMomentum[0]+pTrackMomentum[1]*pTrackMomentum[1]+pTrackMomentum[2]*pTrackMomentum[2]);
         double pNeg2 = sqrt(nTrackMomentum[0]*nTrackMomentum[0]+nTrackMomentum[1]*nTrackMomentum[1]+nTrackMomentum[2]*nTrackMomentum[2]);
 
         if(debugmode > 100) AliInfo("03");
         //// Cuts
         if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
-          lambdaCandidate = false;
-          antilambdaCandidate = false;
+          kshortCandidate = false;
         }
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Track cut!");
-        ((TH1F*)fOutputList->FindObject("fNTPCcls_lam"))->Fill(fTPCNcls);
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Track cut!");
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-        if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(5);
+        if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(5);
         // is daughter particle okay?
         if (!pTrack || !nTrack) {
             Printf("ERROR: Could not retreive one of the daughter track");
             continue;
         }
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(7);
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(7);
         // Like sign cut
         if ( pTrack->GetSign() == nTrack->GetSign()) {
             continue;
         }
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(9);
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(9);
         //psuedorapidity cut
-    		if(cutEta != -999) {
-    			if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
-    				lambdaCandidate = false;
-    				antilambdaCandidate = false;
-    			}
-    		}
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Eta cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(11);
+            if(cutEta != -999) {
+                if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
+                    kshortCandidate = false;
+
+                }
+            }
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Eta cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(11);
         // CPA cut
         if(cutCosPa != -999) {
-          if (lV0cosPointAngle < cutCosPa){
-            lambdaCandidate = false;
-            antilambdaCandidate = false;
+          if (kV0cosPointAngle < cutCosPa){
+            kshortCandidate = false;
           }
         }
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("CPA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13);
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("CPA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(13);
         // DCA between daughterscut
-		    if(cutDCA != -999) {
-          if(v0i->GetDcaV0Daughters() > cutDCA) {
-            lambdaCandidate = false;
-            antilambdaCandidate = false;
+            if(cutDCA != -999) {
+          if(v0j->GetDcaV0Daughters() > cutDCA) {
+            kshortCandidate = false;
+
           }
         }
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("DCA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(15);
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("DCA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(15);
         //lifetime cut
         /*
-    		if(cutcTau != -999){
-    			if(cTauLa < cutcTau){
-    				lambdaCandidate = false;
-    			}
-    			if(cTauLb < cutcTau){
-    				antilambdaCandidate = false;
-    			}
-    		}*/
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Lifetime cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(17);
-        // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
-    		if(cutBetheBloch != -999) {
-    			if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
-    			if(lambdaCandidate) {
-    				if(cutBetheBloch > 0) {
-    				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kProton)) > cutBetheBloch ) lambdaCandidate = false;
-    				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) lambdaCandidate = false;
-    				}
-    				if(cutBetheBloch == -4) {
-    					double beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+prMass*prMass))),2);
-    					double gamma2 = 1.0/(1.0-beta2);
-    					if(pTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) lambdaCandidate = false;
-            }
-          }
-    			if(antilambdaCandidate) {
-    				if(cutBetheBloch > 0) {
-    					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kProton)) > cutBetheBloch )
-    					{antilambdaCandidate = false;}
-    					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kPion)) > cutBetheBloch )
-    					{antilambdaCandidate = false;}
-    				}
+            if(cutcTau != -999){
+                if(cTauLa < cutcTau){
+                    kshortCandidate = false;
+                }
+                if(cTauLb < cutcTau){
 
-    				if(cutBetheBloch == -4) {
-    						double beta2 = TMath::Power((pNeg2/TMath::Sqrt((pNeg2*pNeg2+0.9*0.9))),2);
-    						double gamma2 = 1.0/(1.0-beta2);
-    						if(nTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) antilambdaCandidate = false;
-    				}
-    			}
-    		}
-        if(lambdaCandidate == false && antilambdaCandidate == false) continue;
-        if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(19);
-        //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
+                }
+            }*/
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Lifetime cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(17);
+        // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
+        if(cutBetheBloch != -999) {
+            if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
+
+            if(cutBetheBloch > 0) {
+                    if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) kshortCandidate = false;
+                    if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kPion)) > cutBetheBloch ) kshortCandidate = false;
+                }
+
+            if(cutBetheBloch == -4) {
+                double par0 = 0.20;
+                double par1 = 4.2;
+                double par2 = 1000000;
+                double beta2 = TMath::Power((pNeg2/TMath::Sqrt((pNeg2*pNeg2+par0*par0))),2);
+                    double gamma2 = 1.0/(1.0-beta2);
+                    if(nTrack->GetTPCsignal() > (par1/beta2)*(TMath::Log(par2*beta2*gamma2)-beta2) && TMath::Log10(pNeg2) > -0.6) kshortCandidate = false;
+
+                    beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+par0*par0))),2);
+                    gamma2 = 1.0/(1.0-beta2);
+                    if(pTrack->GetTPCsignal() > (par1/beta2)*(TMath::Log(par2*beta2*gamma2)-beta2) && TMath::Log10(pPos2) > -0.6) kshortCandidate = false;
+            }
+        }
+        if(kshortCandidate == false) continue;
+        if(!(kshortCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(19);
+        //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (kV0cosPointAngle < 0.998) || (kV0Radius < 0.0) || (kV0Radius > 1000) ) continue;
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(23);
         if(debugmode > 100) AliInfo("04");
 
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(25);
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(25);
         //remove all non-candidates
-    		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(kshortCandidate == false) continue;
         if(debugmode > 10) AliInfo("============v0 survived!============");
 
-        ((TH1F*)fOutputList->FindObject("fHistCosPA_lam"))->Fill(lV0cosPointAngle);
-        ((TH1F*)fOutputList->FindObject("fHistDecayL_lam"))->Fill(decayLength);
-        ((TH1F*)fOutputList->FindObject("fHistTauLa"))->Fill(cTauLa);
-        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_lam"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
-		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_lam"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
-
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(27);
+        ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
+        if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
+        ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength2);
+        if(debugmode > 10) AliInfo("============fHistDecayL_k0s!============");
+        //((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
+        if(debugmode > 10) AliInfo("============fHistTauk0s!============");
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_k0s"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
+        if(debugmode > 10) AliInfo("============fHistBetheBlochTPCPos_k0s!============");
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_k0s"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+        if(debugmode > 10) AliInfo("============k0 qa histograms============");
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(27);
         // Mass Hypothesis for Lambda
-        //v0i->ChangeMassHypothesis(3122);
+        //v0j->ChangeMassHypothesis(3122);
         //sets assumed particle type of pos/neg daughters.
-		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
-		    int dPos = 4;
-		    int dNeg = 2;
-        if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(29);
-        double lInvMassLambda = 0.;
-        if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
-        if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
+            // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
+            int dPos = 2;
+            int dNeg = 2;
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(29);
+        double lInvMassK0s = 0.;
+        lInvMassK0s = v0j->GetEffMass(dPos,dNeg);
         if(debugmode > 100) AliInfo("04-1");
-
-        if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(31);
+        if (pTrack->GetMass() > 0.2 || nTrack->GetMass() > 0.2) continue;
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(31);
         if(debugmode > 50) AliInfo("daughter mass cut pass");
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
-
+        ((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
+        if(debugmode > 10) AliInfo("============ArmPod Kaon============");
         if(debugmode > 100) AliInfo("04-5");
         // Armenteros-Podolansiki Cut
-        if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(33);
-        ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
+        if (TMath::Abs(0.2 * v0j->AlphaV0()) > v0j->PtArmV0()) continue;
+        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(33);
+        ((TH2F*)fOutputList->FindObject("fArmPod_kaon_cut"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
+        if(debugmode > 10) AliInfo("============ArmPod Kaon 2!============");
         if(debugmode > 100) AliInfo("05");
 
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-        ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
-        //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
-        ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
+        ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0s);
+        //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
+        ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
+        if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
-        for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
-            bool kshortCandidate = true;
+        for (Int_t iV0 = jV0; iV0 < nv0s; iV0++){
+            bool lambdaCandidate = true;
+            bool antilambdaCandidate = true;
             // keep only events of interest for fHistMLa plots
             // from PWGLF/STRANGENESS/LambdaK0PbPb/AliAnalysisTaskLukeV0.cxx
 
-            AliESDv0 *v0j = ((AliESDEvent*)fESD)->GetV0(jV0);
-            if (!v0j) continue;
-            if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(1);
+            AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
+            if (!v0i) continue;
+            if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(1);
             if(debugmode > 100) AliInfo("01");
             //---> Fix On-the-Fly candidates, count how many swapped
-            if ( v0j->GetParamN()->Charge() > 0 && v0j->GetParamP()->Charge() < 0 ) {
+            if ( v0i->GetParamN()->Charge() > 0 && v0i->GetParamP()->Charge() < 0 ) {
                 fHistSwappedV0Counter -> Fill( 1 );
             } else {
                 fHistSwappedV0Counter -> Fill( 0 );
             }
-            if ( fkUseOnTheFly ) CheckChargeV0(v0j);
+            if ( fkUseOnTheFly ) CheckChargeV0(v0i);
 
             Int_t    lOnFlyStatus = 0; // nv0sOn = 0, nv0sOff = 0;
-            lOnFlyStatus = v0j->GetOnFlyStatus();
+            lOnFlyStatus = v0i->GetOnFlyStatus();
             if (lOnFlyStatus == 0) continue;
             if(debugmode > 100) AliInfo("02");
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(3);
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(3);
 
             //// Get V0 informations for the cuts
             Double_t lPt = 0;
-            lPt = v0j->Pt();
-            if (v0j->GetEffMass(2,2) < 0.414 || v0j->GetEffMass(2,2) > 0.582 || TMath::Abs(v0j->Y(310))>0.5) kshortCandidate = false;
-
-            if(debugmode > 50 && kshortCandidate) AliInfo("K0s Case");
+            lPt = v0i->Pt();
+            if (v0i->GetEffMass(4,2) < 1.08 || v0i->GetEffMass(4,2) > 1.2 || TMath::Abs(v0i->Y(3122))>0.5 ) lambdaCandidate = false;
+            if (v0i->GetEffMass(2,4) < 1.08 || v0i->GetEffMass(2,4) > 1.2 || TMath::Abs(v0i->Y(-3122))>0.5) antilambdaCandidate = false;
+            if(debugmode > 50 && lambdaCandidate) AliInfo("Lambda0 Case");
+            if(debugmode > 50 && antilambdaCandidate) AliInfo("Anti-Lambda0 Case");
             // get daughter particle
-            UInt_t lKeyPos = (UInt_t)TMath::Abs(v0j->GetPindex());
-            UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0j->GetNindex());
+            UInt_t lKeyPos = (UInt_t)TMath::Abs(v0i->GetPindex());
+            UInt_t lKeyNeg = (UInt_t)TMath::Abs(v0i->GetNindex());
             AliESDtrack *pTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyPos);
             AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
-            const AliExternalTrackParam * paramPosl = v0j->GetParamP();
-            const AliExternalTrackParam * paramNegl = v0j->GetParamN();
+            const AliExternalTrackParam * paramPosl = v0i->GetParamP();
+            const AliExternalTrackParam * paramNegl = v0i->GetParamN();
+            // TPC nCluster
+            Int_t fTPCNcls = -100;
+            fTPCNcls = pTrack->GetTPCNcls();
             // Cosine Pointing Angle and DCA Values
-            Double_t kV0cosPointAngle = v0j->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
-            Double_t kV0Position[3];
-            Double_t kV0Radius = 0;
-            v0j->GetXYZ(kV0Position[0], kV0Position[1], kV0Position[2]);
-            kV0Radius = TMath::Sqrt(kV0Position[0] * kV0Position[0] + kV0Position[1] * kV0Position[1]);
+            Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
+            Double_t lV0Position[3];
+            Double_t lV0Radius = 0;
+            v0i->GetXYZ(lV0Position[0], lV0Position[1], lV0Position[2]);
+            lV0Radius = TMath::Sqrt(lV0Position[0] * lV0Position[0] + lV0Position[1] * lV0Position[1]);
             Double_t lDcaPosToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
             Double_t lDcaNegToPrimVertex = TMath::Abs(pTrack->GetD(primaryVtx[0], primaryVtx[1], lMagneticField));
-            Double_t lDcaV0Daughters = v0j->GetDcaV0Daughters();
+            Double_t lDcaV0Daughters = v0i->GetDcaV0Daughters();
             Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
-            v0j->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+            v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
             // Decay length
-            double decayLength2 = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
-            double cTauK0 = decayLength2*(v0j->GetEffMass(2,2))/(v0j->P());
+            double decayLength = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
+      		  double cTauLa = decayLength*(v0i->GetEffMass(4,2))/(v0i->P());
+            double cTauLb = decayLength*(v0i->GetEffMass(2,4))/(v0i->P());
             // momentums
             double pTrackMomentum[3];
-            double nTrackMomentum[3];
+    		    double nTrackMomentum[3];
             pTrack->GetConstrainedPxPyPz(pTrackMomentum);
-                nTrack->GetConstrainedPxPyPz(nTrackMomentum);
+    		    nTrack->GetConstrainedPxPyPz(nTrackMomentum);
             double pPos2 = sqrt(pTrackMomentum[0]*pTrackMomentum[0]+pTrackMomentum[1]*pTrackMomentum[1]+pTrackMomentum[2]*pTrackMomentum[2]);
             double pNeg2 = sqrt(nTrackMomentum[0]*nTrackMomentum[0]+nTrackMomentum[1]*nTrackMomentum[1]+nTrackMomentum[2]*nTrackMomentum[2]);
 
             if(debugmode > 100) AliInfo("03");
             //// Cuts
             if(!(fTrackCuts->IsSelected(pTrack)) || !(fTrackCuts->IsSelected(nTrack))) {
-              kshortCandidate = false;
+              lambdaCandidate = false;
+              antilambdaCandidate = false;
             }
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Track cut!");
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Track cut!");
+            ((TH1F*)fOutputList->FindObject("fNTPCcls_lam"))->Fill(fTPCNcls);
             // Pt cut for mother particle
             if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
-            if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(5);
+            if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(5);
             // is daughter particle okay?
             if (!pTrack || !nTrack) {
                 Printf("ERROR: Could not retreive one of the daughter track");
                 continue;
             }
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(7);
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(7);
             // Like sign cut
             if ( pTrack->GetSign() == nTrack->GetSign()) {
                 continue;
             }
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(9);
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(9);
             //psuedorapidity cut
-                if(cutEta != -999) {
-                    if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
-                        kshortCandidate = false;
-
-                    }
-                }
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Eta cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(11);
+        		if(cutEta != -999) {
+        			if(TMath::Abs(pTrack->Eta()) > cutEta || TMath::Abs(nTrack->Eta())  >cutEta) {
+        				lambdaCandidate = false;
+        				antilambdaCandidate = false;
+        			}
+        		}
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Eta cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(11);
             // CPA cut
             if(cutCosPa != -999) {
-              if (kV0cosPointAngle < cutCosPa){
-                kshortCandidate = false;
+              if (lV0cosPointAngle < cutCosPa){
+                lambdaCandidate = false;
+                antilambdaCandidate = false;
               }
             }
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("CPA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(13);
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("CPA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(13);
             // DCA between daughterscut
-                if(cutDCA != -999) {
-              if(v0j->GetDcaV0Daughters() > cutDCA) {
-                kshortCandidate = false;
-
+    		    if(cutDCA != -999) {
+              if(v0i->GetDcaV0Daughters() > cutDCA) {
+                lambdaCandidate = false;
+                antilambdaCandidate = false;
               }
             }
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("DCA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(15);
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("DCA cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(15);
             //lifetime cut
             /*
-                if(cutcTau != -999){
-                    if(cTauLa < cutcTau){
-                        kshortCandidate = false;
-                    }
-                    if(cTauLb < cutcTau){
-
-                    }
-                }*/
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("Lifetime cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(17);
+        		if(cutcTau != -999){
+        			if(cTauLa < cutcTau){
+        				lambdaCandidate = false;
+        			}
+        			if(cTauLb < cutcTau){
+        				antilambdaCandidate = false;
+        			}
+        		}*/
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Lifetime cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(17);
             // Bethe Bloch cut. Made sightly complicated as options for crude cuts still included. Should probably reduce to just 'official' cuts
-            if(cutBetheBloch != -999) {
-                if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
-
-                if(cutBetheBloch > 0) {
-                        if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) kshortCandidate = false;
-                        if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kPion)) > cutBetheBloch ) kshortCandidate = false;
-                    }
-
-                if(cutBetheBloch == -4) {
-                    double par0 = 0.20;
-                    double par1 = 4.2;
-                    double par2 = 1000000;
-                    double beta2 = TMath::Power((pNeg2/TMath::Sqrt((pNeg2*pNeg2+par0*par0))),2);
-                        double gamma2 = 1.0/(1.0-beta2);
-                        if(nTrack->GetTPCsignal() > (par1/beta2)*(TMath::Log(par2*beta2*gamma2)-beta2) && TMath::Log10(pNeg2) > -0.6) kshortCandidate = false;
-
-                        beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+par0*par0))),2);
-                        gamma2 = 1.0/(1.0-beta2);
-                        if(pTrack->GetTPCsignal() > (par1/beta2)*(TMath::Log(par2*beta2*gamma2)-beta2) && TMath::Log10(pPos2) > -0.6) kshortCandidate = false;
+        		if(cutBetheBloch != -999) {
+        			if(pTrack->GetTPCsignal() <0 || nTrack->GetTPCsignal()<0) continue;
+        			if(lambdaCandidate) {
+        				if(cutBetheBloch > 0) {
+        				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kProton)) > cutBetheBloch ) lambdaCandidate = false;
+        				if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kPion)) > cutBetheBloch ) lambdaCandidate = false;
+        				}
+        				if(cutBetheBloch == -4) {
+        					double beta2 = TMath::Power((pPos2/TMath::Sqrt((pPos2*pPos2+prMass*prMass))),2);
+        					double gamma2 = 1.0/(1.0-beta2);
+        					if(pTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) lambdaCandidate = false;
                 }
-            }
-            if(kshortCandidate == false) continue;
-            if(!(kshortCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(19);
-            //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (kV0cosPointAngle < 0.998) || (kV0Radius < 0.0) || (kV0Radius > 1000) ) continue;
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(23);
+              }
+        			if(antilambdaCandidate) {
+        				if(cutBetheBloch > 0) {
+        					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(nTrack, AliPID::kProton)) > cutBetheBloch )
+        					{antilambdaCandidate = false;}
+        					if(TMath::Abs(fPIDResponse->NumberOfSigmasTPC(pTrack, AliPID::kPion)) > cutBetheBloch )
+        					{antilambdaCandidate = false;}
+        				}
+
+        				if(cutBetheBloch == -4) {
+        						double beta2 = TMath::Power((pNeg2/TMath::Sqrt((pNeg2*pNeg2+0.9*0.9))),2);
+        						double gamma2 = 1.0/(1.0-beta2);
+        						if(nTrack->GetTPCsignal() < (2.3/beta2)*(TMath::Log(1e6*beta2*gamma2)-beta2)) antilambdaCandidate = false;
+        				}
+        			}
+        		}
+            if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+            if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(19);
+            //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
             if(debugmode > 100) AliInfo("04");
 
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(25);
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(25);
             //remove all non-candidates
-                if(kshortCandidate == false) continue;
+        		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
             if(debugmode > 10) AliInfo("============v0 survived!============");
 
-            ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
-            if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
-            ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength2);
-            if(debugmode > 10) AliInfo("============fHistDecayL_k0s!============");
-            //((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
-            if(debugmode > 10) AliInfo("============fHistTauk0s!============");
-            ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_k0s"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
-            if(debugmode > 10) AliInfo("============fHistBetheBlochTPCPos_k0s!============");
-            ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_k0s"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
-            if(debugmode > 10) AliInfo("============k0 qa histograms============");
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(27);
+            ((TH1F*)fOutputList->FindObject("fHistCosPA_lam"))->Fill(lV0cosPointAngle);
+            ((TH1F*)fOutputList->FindObject("fHistDecayL_lam"))->Fill(decayLength);
+            ((TH1F*)fOutputList->FindObject("fHistTauLa"))->Fill(cTauLa);
+            ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_lam"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
+    		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_lam"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(27);
             // Mass Hypothesis for Lambda
-            //v0j->ChangeMassHypothesis(3122);
+            //v0i->ChangeMassHypothesis(3122);
             //sets assumed particle type of pos/neg daughters.
-                // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
-                int dPos = 2;
-                int dNeg = 2;
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(29);
-            double lInvMassK0s = 0.;
-            lInvMassK0s = v0j->GetEffMass(dPos,dNeg);
+    		    // 0 = electron, 1 = Muon, 2 = pion, 3 = kaon, 4 = proton.
+    		    int dPos = 4;
+    		    int dNeg = 2;
+            if(!(v0i->GetEffMass(dPos,dNeg) > 1.11 && v0i->GetEffMass(dPos,dNeg) < 1.13)) continue;
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(29);
+            double lInvMassLambda = 0.;
+            if(lambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
+            if(antilambdaCandidate) lInvMassLambda = v0i->GetEffMass(dPos,dNeg);
             if(debugmode > 100) AliInfo("04-1");
-            if (pTrack->GetMass() > 0.2 || nTrack->GetMass() > 0.2) continue;
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(31);
+
+            if (!((pTrack->GetMass() > 0.9 && nTrack->GetMass() < 0.2)||(pTrack->GetMass() < 0.2 && nTrack->GetMass() > 0.9))) continue;
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(31);
             if(debugmode > 50) AliInfo("daughter mass cut pass");
-            ((TH2F*)fOutputList->FindObject("fArmPod_kaon"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
-            if(debugmode > 10) AliInfo("============ArmPod Kaon============");
+            ((TH2F*)fOutputList->FindObject("fArmPod_lambda"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
+
             if(debugmode > 100) AliInfo("04-5");
             // Armenteros-Podolansiki Cut
-            if (TMath::Abs(0.2 * v0j->AlphaV0()) > v0j->PtArmV0()) continue;
-            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(33);
-            ((TH2F*)fOutputList->FindObject("fArmPod_kaon_cut"))->Fill(v0j->AlphaV0(),v0j->PtArmV0());
-            if(debugmode > 10) AliInfo("============ArmPod Kaon 2!============");
+            if (TMath::Abs(0.2 * v0i->AlphaV0()) < v0i->PtArmV0()) continue;
+            if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(33);
+            ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
             if(debugmode > 100) AliInfo("05");
 
             //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
-            ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0s);
-            //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
-            ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
-            if(debugmode > 10) AliInfo("============fill invmass!============");
+            ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
+            //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
+            ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
             //}
+
         }
     }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
