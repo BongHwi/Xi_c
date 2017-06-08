@@ -579,8 +579,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
         v0j->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
         // Decay length
-        double decayLength = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
-        double cTauK0 = decayLength*(v0j->GetEffMass(2,2))/(v0j->P());
+        double decayLength2 = (sqrt((primaryVtx[0]-primaryVtx[0])*(primaryVtx[0]-primaryVtx[0])+(primaryVtx[1]-primaryVtx[1])*(primaryVtx[1]-primaryVtx[1])+(primaryVtx[2]-primaryVtx[2])*(primaryVtx[2]-primaryVtx[2])));
+        double cTauK0 = decayLength2*(v0j->GetEffMass(2,2))/(v0j->P());
         // momentums
         double pTrackMomentum[3];
         double nTrackMomentum[3];
@@ -683,9 +683,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
         if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
-        ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength);
+        ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength2);
         if(debugmode > 10) AliInfo("============fHistDecayL_k0s!============");
-        ((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
+        //((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
         if(debugmode > 10) AliInfo("============fHistTauk0s!============");
         ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_k0s"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
         if(debugmode > 10) AliInfo("============fHistBetheBlochTPCPos_k0s!============");
