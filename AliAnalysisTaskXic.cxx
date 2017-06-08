@@ -126,6 +126,8 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     // Deafult Analysis setup
     TH1F *hNofV0 = new TH1F("hNofV0", "hNofV0", 40, 0, 40);
       hNofV0->GetXaxis()->SetTitle("# of v0 through each cut");
+    TH1F *hNofV0_2 = new TH1F("hNofV0_2", "hNofV0_2", 40, 0, 40);
+      hNofV0_2->GetXaxis()->SetTitle("# of v0 through each cut");
     TH1F *hEventSelecInfo = new TH1F("hEventSelecInfo", "hEventSelecInfo", 10, 0, 10);
       hEventSelecInfo->GetXaxis()->SetBinLabel(1, "NONE");
       hEventSelecInfo->GetXaxis()->SetBinLabel(2, "kMB");
@@ -142,6 +144,8 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
       fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
       fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
       fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
+    TH1F *fNTPCcls = new TH1F("fNTPCcls","fNTPCcls",200,0,200);
+      fNTPCcls->GetXaxis()->SetTitle("fNTPCcls");
     TH1F *fHistCosPA = new	TH1F("fHistCosPA", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
     TH1F *fHistDCAV0Daughters = new	TH1F("fHistDCAV0Daughters", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
   	TH1F *fHistDecayL = new	TH1F("fHistDecayL", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
@@ -181,10 +185,12 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *hInvMass = new TH1F("hInvMass", "Invariant mass distribution", 1000, 2.0, 3.0);
 
     fOutputList->Add(hNofV0);
+    fOutputList->Add(hNofV0_2);
     fOutputList->Add(hEventSelecInfo);
     fOutputList->Add(hCentrality);
     fOutputList->Add(fMultDist);
     fOutputList->Add(fVertexDistXYZ);
+    fOutputList->Add(fNTPCcls);
     fOutputList->Add(fHistCosPA);
     fOutputList->Add(fHistDCAV0Daughters);
   	fOutputList->Add(fHistDecayL);
@@ -341,6 +347,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         AliESDtrack *nTrack = ((AliESDEvent*)fESD)->GetTrack(lKeyNeg);
         const AliExternalTrackParam * paramPosl = v0i->GetParamP();
         const AliExternalTrackParam * paramNegl = v0i->GetParamN();
+        // TPC nCluster
+        Int_t fTPCNcls = -100;
+        fTPCNcls = pTrack->GetTPCNcls();
         // Cosine Pointing Angle and DCA Values
         Double_t lV0cosPointAngle = v0i->GetV0CosineOfPointingAngle(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
         Double_t lV0Position[3];
@@ -372,6 +381,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         }
         if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Track cut!");
+        ((TH1F*)fOutputList->FindObject("fNTPCcls"))->Fill(fTPCNcls);
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(5);
