@@ -531,7 +531,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
         //}
     }
-    for (Int_t jV0 = 0; jV0 < nv0s; jV0++){
+    /*for (Int_t jV0 = 0; jV0 < nv0s; jV0++){
         bool kshortCandidate = true;
         // keep only events of interest for fHistMLa plots
         // from PWGLF/STRANGENESS/LambdaK0PbPb/AliAnalysisTaskLukeV0.cxx
@@ -715,7 +715,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
         //}
-    }
+    }*/
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
 }
