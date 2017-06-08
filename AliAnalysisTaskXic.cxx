@@ -221,9 +221,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->Add(fArmPod_lambda);
     fOutputList->Add(fArmPod_lambda_cut);
 
-    //fOutputList->Add(fInvK0Short);
+    fOutputList->Add(fInvK0Short);
     //fOutputList->Add(fInvK0Short_beforePID);
-    //fOutputList->Add(fInvK0ShortCut);
+    fOutputList->Add(fInvK0ShortCut);
     fOutputList->Add(fInvLambda);
     //fOutputList->Add(fInvLambda_beforePID);
     fOutputList->Add(fInvLambdaCut);
