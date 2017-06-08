@@ -327,8 +327,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     // loop for Lambda
     Int_t nv0s = 0;
     nv0s = fESD->GetNumberOfV0s();
+    const Int_t nv0sc = nv0s;
+    Int_t v0checklam[nv0sc];
+    Int_t v0checkk0s[nv0sc];
+
     if(debugmode > 100) AliInfo("Starting V0 loop!");
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
+        v0checklam[iV0] = 0;
         bool lambdaCandidate = true;
         bool antilambdaCandidate = true;
         // keep only events of interest for fHistMLa plots
@@ -530,9 +535,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
         //}
-
+        v0checklam[iV0] = 1;
     }
     for (Int_t jV0 = 0; jV0 < nv0s; jV0++){
+        v0checkk0s[iV0] = 0;
         bool kshortCandidate = true;
         // keep only events of interest for fHistMLa plots
         // from PWGLF/STRANGENESS/LambdaK0PbPb/AliAnalysisTaskLukeV0.cxx
@@ -722,6 +728,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
         if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
+        v0checkk0s[iV0] = 1;
     }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
