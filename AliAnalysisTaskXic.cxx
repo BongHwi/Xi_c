@@ -732,7 +732,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     }
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
-        if(v0checklam[iV0] && v0checkk0s[iV0]) continue;
+        if(!(v0checklam[iV0] && v0checkk0s[iV0])) continue;
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
         AliESDv0 *v0j = ((AliESDEvent*)fESD)->GetV0(jV0);
         Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
