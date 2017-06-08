@@ -730,6 +730,32 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //}
         v0checkk0s[jV0] = 1;
     }
+    for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
+      for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
+        if(v0checklam[iV0] && v0checkk0s[iV0]) continue;
+        AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
+        AliESDv0 *v0j = ((AliESDEvent*)fESD)->GetV0(jV0);
+        Double_t tV0momi[3], tV0momj[3], tV0mom_result[3];
+        v0i->GetPxPyPz(tV0momi[0], tV0momi[1], tV0momi[2]);
+        v0j->GetPxPyPz(tV0momj[0], tV0momj[1], tV0momj[2]);
+        //// ---- Calculate inv. mass for Xi_c ---- ////
+        ei = getEnergy(k0Mass, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(K0Short)
+        ej = getEnergy(l0Mass, tV0momj[0], tV0momj[1], tV0momj[2]); // Energy of first particle(K0Short)
+
+        angle = getAngle(tV0momi[0], tV0momi[1], tV0momi[2], tV0momj[0], tV0momj[1], tV0momj[2]);
+        fMass = k0Mass * k0Mass + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
+        if (fMass <= 0) continue;
+        fMass = sqrt(fMass);
+
+        tV0mom_result[0] = tV0momi[0] + tV0momj[0];
+        tV0mom_result[1] = tV0momi[1] + tV0momj[1];
+        tV0mom_result[2] = tV0momi[2] + tV0momj[2];
+        fPt_result = sqrt(pow(tV0mom_result[0], 2) + pow(tV0mom_result[1], 2));
+
+        ((TH2F*)fOutputList2->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
+        ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
+      }
+    }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
 }
