@@ -682,10 +682,14 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 10) AliInfo("============v0 survived!============");
 
         ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
+        if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
         ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength);
+        if(debugmode > 10) AliInfo("============fHistDecayL_k0s!============");
         ((TH1F*)fOutputList->FindObject("fHistTauk0s"))->Fill(cTauK0);
+        if(debugmode > 10) AliInfo("============fHistTauk0s!============");
         ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_k0s"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
-            ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_k0s"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+        if(debugmode > 10) AliInfo("============fHistBetheBlochTPCPos_k0s!============");
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_k0s"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
         if(debugmode > 10) AliInfo("============k0 qa histograms============");
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(27);
         // Mass Hypothesis for Lambda
