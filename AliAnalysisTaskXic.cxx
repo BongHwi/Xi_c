@@ -144,17 +144,28 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
       fVertexDistXYZ->GetXaxis()->SetTitle("X Vertex (cm)");
       fVertexDistXYZ->GetYaxis()->SetTitle("Y Vertex (cm)");
       fVertexDistXYZ->GetZaxis()->SetTitle("Z Vertex (cm)");
-    TH1F *fNTPCcls = new TH1F("fNTPCcls","fNTPCcls",200,0,200);
-      fNTPCcls->GetXaxis()->SetTitle("fNTPCcls");
-    TH1F *fHistCosPA = new	TH1F("fHistCosPA", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
-    TH1F *fHistDCAV0Daughters = new	TH1F("fHistDCAV0Daughters", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
-  	TH1F *fHistDecayL = new	TH1F("fHistDecayL", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
+    // Labmda QA
+    TH1F *fNTPCcls_lam = new TH1F("fNTPCcls_lam","fNTPCcls_lam",200,0,200);
+      fNTPCcls_lam->GetXaxis()->SetTitle("fNTPCcls_lam");
+    TH1F *fHistCosPA_lam = new	TH1F("fHistCosPA_lam", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
+    TH1F *fHistDCAV0Daughters_lam = new	TH1F("fHistDCAV0Daughters_lam", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
+  	TH1F *fHistDecayL_lam = new	TH1F("fHistDecayL_lam", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
     TH1F *fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under Lambda mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
-    TH2F *fHistBetheBlochTPCNeg = new	TH2F("fHistBetheBlochTPCNeg","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
-  	TH2F *fHistBetheBlochTPCPos = new	TH2F("fHistBetheBlochTPCPos","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+    TH2F *fHistBetheBlochTPCNeg_lam = new	TH2F("fHistBetheBlochTPCNeg_lam","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+  	TH2F *fHistBetheBlochTPCPos_lam = new	TH2F("fHistBetheBlochTPCPos_lam","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+    // K0Short QA
+    TH1F *fNTPCcls_k0s = new TH1F("fNTPCcls_k0s","fNTPCcls_k0s",200,0,200);
+      fNTPCcls_k0s->GetXaxis()->SetTitle("fNTPCcls_k0s");
+    TH1F *fHistCosPA_k0s = new	TH1F("fHistCosPA_k0s", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
+    TH1F *fHistDCAV0Daughters_k0s = new	TH1F("fHistDCAV0Daughters_k0s", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
+    TH1F *fHistDecayL_k0s = new	TH1F("fHistDecayL_k0s", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
+    TH1F *fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under k0s mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
+    TH2F *fHistBetheBlochTPCNeg_k0s = new	TH2F("fHistBetheBlochTPCNeg_k0s","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+    TH2F *fHistBetheBlochTPCPos_k0s = new	TH2F("fHistBetheBlochTPCPos_k0s","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
 
     // Armenteros-Podolanski Plot
     TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
+    TH2F *fArmPod_kaon_cut = new TH2F("fArmPod_kaon_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
     TH2F *fArmPod_lambda = new TH2F("fArmPod_lambda", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
     TH2F *fArmPod_lambda_cut = new TH2F("fArmPod_lambda_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
 
@@ -190,15 +201,23 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->Add(hCentrality);
     fOutputList->Add(fMultDist);
     fOutputList->Add(fVertexDistXYZ);
-    fOutputList->Add(fNTPCcls);
-    fOutputList->Add(fHistCosPA);
-    fOutputList->Add(fHistDCAV0Daughters);
-  	fOutputList->Add(fHistDecayL);
+    fOutputList->Add(fNTPCcls_lam);
+    fOutputList->Add(fHistCosPA_lam);
+    fOutputList->Add(fHistDCAV0Daughters_lam);
+  	fOutputList->Add(fHistDecayL_lam);
   	fOutputList->Add(fHistTauLa);
-	  fOutputList->Add(fHistBetheBlochTPCNeg);
-    fOutputList->Add(fHistBetheBlochTPCPos);
+	  fOutputList->Add(fHistBetheBlochTPCNeg_lam);
+    fOutputList->Add(fHistBetheBlochTPCPos_lam);
+    fOutputList->Add(fNTPCcls_k0s);
+    fOutputList->Add(fHistCosPA_k0s);
+    fOutputList->Add(fHistDCAV0Daughters_k0s);
+  	fOutputList->Add(fHistDecayL_k0s);
+  	fOutputList->Add(fHistTauK0s);
+	  fOutputList->Add(fHistBetheBlochTPCNeg_k0s);
+    fOutputList->Add(fHistBetheBlochTPCPos_k0s);
 
-    //fOutputList->Add(fArmPod_kaon);
+    fOutputList->Add(fArmPod_kaon);
+    fOutputList->Add(fArmPod_kaon_cut);
     fOutputList->Add(fArmPod_lambda);
     fOutputList->Add(fArmPod_lambda_cut);
 
@@ -381,7 +400,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         }
         if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("Track cut!");
-        ((TH1F*)fOutputList->FindObject("fNTPCcls"))->Fill(fTPCNcls);
+        ((TH1F*)fOutputList->FindObject("fNTPCcls_lam"))->Fill(fTPCNcls);
         // Pt cut for mother particle
         if ((lPt < fMinV0Pt) || (fMaxV0Pt < lPt)) continue;
         if(debugmode > 51) ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(5);
@@ -467,12 +486,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(!(lambdaCandidate == false && antilambdaCandidate == false) && debugmode > 50) AliInfo("PID cut!"); ((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(19);
         //if ((lDcaPosToPrimVertex < 0.1) || (lDcaNegToPrimVertex < 0.1) || (lV0cosPointAngle < 0.998) || (lV0Radius < 0.0) || (lV0Radius > 1000) ) continue;
-        // TPC n Cluster cut for daughter particles
-        if ( ( ( ( pTrack->GetTPCClusterInfo(2, 1) ) < 70 ) || ( ( nTrack->GetTPCClusterInfo(2, 1) ) < 70 ) )) continue;
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(21);
-        //Findable clusters > 0 condition
-        if ( pTrack->GetTPCNclsF() <= 0 || nTrack->GetTPCNclsF() <= 0 ) continue;
-        if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(23);
         if(debugmode > 100) AliInfo("04");
 
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(25);
@@ -480,11 +493,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     		if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("============v0 survived!============");
 
-        ((TH1F*)fOutputList->FindObject("fHistCosPA"))->Fill(lV0cosPointAngle);
-        ((TH1F*)fOutputList->FindObject("fHistDecayL"))->Fill(decayLength);
+        ((TH1F*)fOutputList->FindObject("fHistCosPA_lam"))->Fill(lV0cosPointAngle);
+        ((TH1F*)fOutputList->FindObject("fHistDecayL_lam"))->Fill(decayLength);
         ((TH1F*)fOutputList->FindObject("fHistTauLa"))->Fill(cTauLa);
-        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
-		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
+        ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCPos_lam"))->Fill(TMath::Log10(pPos2),pTrack->GetTPCsignal());
+		    ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPCNeg_lam"))->Fill(TMath::Log10(pNeg2),nTrack->GetTPCsignal());
 
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(27);
         // Mass Hypothesis for Lambda
