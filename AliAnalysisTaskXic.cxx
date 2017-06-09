@@ -733,6 +733,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
     }
+    cout << "yeah!" << endl;
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
         //if(v0checklam[iV0]) cout << iV0 << " Lambda: "<< v0checklam[iV0] << endl;
@@ -756,6 +757,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ej = getEnergy(l0Mass, tV0momj[0], tV0momj[1], tV0momj[2]); // Energy of first particle(K0Short)
 
         angle = getAngle(tV0momi[0], tV0momi[1], tV0momi[2], tV0momj[0], tV0momj[1], tV0momj[2]);
+
+        cout << "ei: " << ei << ", ej: " << ej ", angle: "<< angle << endl;
 
         fMass = k0Mass * k0Mass + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
         if (fMass <= 0) continue;
