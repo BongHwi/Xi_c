@@ -53,8 +53,8 @@ void runAnalysis(const char* pluginmode = "test")
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
-        plugin->SetGridDataDir(Form("/alice/data/%i/%i",year,prod));
-        plugin->SetDataPattern(Form("/%i/*AliESDs.root",pass));
+        plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod));
+        plugin->SetDataPattern(Form("/%s/*AliESDs.root",pass));
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
