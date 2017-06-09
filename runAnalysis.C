@@ -43,43 +43,52 @@ void runAnalysis(const char* pluginmode = "test")
 	printf("GRID MODE");
         AliAnalysisAlien *plugin = new AliAnalysisAlien();
 
+        plugin->SetRunMode(pluginmode);
         plugin->SetUser("blim");
         gSystem->Setenv("alien_CLOSE_SE","working_disk_SE");
         plugin->SetAPIVersion("V1.1x");
         plugin->SetAliROOTVersion("v5-06-15");
         plugin->SetAliPhysicsVersion("v5-06-15-01");
+        plugin->SetNtestFiles(1);
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
         plugin->SetGridDataDir(Form("/alice/data/%i/%i",year,prod));
         plugin->SetDataPattern(Form("/%i/*AliESDs.root",pass));
-	      plugin->SetOutputFiles("AnalysisResults.root");
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
         //plugin->AddRunNumber(167813);
+        Int_t nruns = 0;
         for (Int_t irun=runNmin;irun<runNmax;irun++){
             plugin->AddRunNumber((Int_t )runList[irun]);
+            nruns++;
         }
-        plugin->SetSplitMaxInputFileNumber(10);
+        plugin->SetNrunsPerMaster(nruns);
+        plugin->SetSplitMaxInputFileNumber(20);
+        plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER -I$ALICE_ROOT/TOF -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include");
+
 
         plugin->SetExecutable("Xic.sh");
-        plugin->SetTTL(40000);
+        plugin->SetTTL(72000);
+        plugin->SetSplitMode("se");
         plugin->SetJDLName("Xic.jdl");
+        plugin->SetAnalysisMacro("Xi_c_blim.C");
+        plugin->SetValidationScript("Xic_validation.sh");
 
         plugin->SetDefaultOutputs(kFALSE);
         plugin->SetOutputToRunNo(kTRUE);
+        plugin->SetOneStageMerging(kFALSE);
         plugin->SetKeepLogs(kTRUE);
-               plugin->SetMaxMergeStages(1);
+        plugin->SetMaxMergeStages(1);
         plugin->SetMergeViaJDL(kTRUE);
-
         // define the output folders
         plugin->SetGridWorkingDir("Xi_c_Test");
         plugin->SetGridOutputDir("20170609_01");
+	      plugin->SetOutputFiles("AnalysisResults.root");
 
         // connect the alien plugin to the manager
         mgr->SetGridHandler(plugin);
-        plugin->SetRunMode(pluginmode);
         mgr->StartAnalysis("grid");
 
     }
