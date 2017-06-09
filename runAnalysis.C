@@ -53,17 +53,18 @@ void runAnalysis(const char* pluginmode = "test")
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
-        plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data()));
-        plugin->SetDataPattern(Form("%s/*AliESDs.root",pass.Data()));
+        plugin->SetGridDataDir(Form("/alice/data/%i/%s/",year,prod.Data()));
+        //plugin->SetDataPattern(Form("%s/*AliESDs.root",pass.Data()));
+        plugin->SetDataPattern("cpass1_pass1/ESDs.root");
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
-        plugin->AddRunNumber(270667);
-        Int_t nruns = 0;/*
+        //plugin->AddRunNumber(270667);
+        Int_t nruns = 0;
         for (Int_t irun=runNmin;irun<runNmax;irun++){
             plugin->AddRunNumber(runList[irun]);
             nruns++;
-        }*/
+        }
         nruns++;
         plugin->SetNrunsPerMaster(nruns);
         plugin->SetSplitMaxInputFileNumber(20);
