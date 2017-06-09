@@ -13,7 +13,7 @@ void runAnalysis(const char* pluginmode = "test")
 
     Int_t year = 2017;
     TString prod = "LHC17c";
-    TString ppass = "cpass1_pass1";
+    TString pass = "cpass1_pass1";
 
     Int_t runNmin=0;
     //Int_t runNmax=22;
@@ -51,9 +51,9 @@ void runAnalysis(const char* pluginmode = "test")
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
-        plugin->SetGridDataDir("/alice/data/2015/LHC15n");
-        plugin->SetDataPattern("/pass4/*AliESDs.root");
-	plugin->SetOutputFiles("AnalysisResults.root");
+        plugin->SetGridDataDir(Form("/alice/data/%i/%i",year,prod));
+        plugin->SetDataPattern(Form("/%i/*AliESDs.root",pass));
+	      plugin->SetOutputFiles("AnalysisResults.root");
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
@@ -74,7 +74,7 @@ void runAnalysis(const char* pluginmode = "test")
 
         // define the output folders
         plugin->SetGridWorkingDir("Xi_c_Test");
-        plugin->SetGridOutputDir("20170513_01");
+        plugin->SetGridOutputDir("20170609_01");
 
         // connect the alien plugin to the manager
         mgr->SetGridHandler(plugin);
