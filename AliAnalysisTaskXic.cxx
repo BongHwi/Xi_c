@@ -278,6 +278,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
+    cout << "Event Accepted" << endl;
     ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
     if(debugmode > 100) AliInfo("after trigger selecction!");
     //------------------------------------------------
