@@ -499,7 +499,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //remove all non-candidates
         if(lambdaCandidate == false && antilambdaCandidate == false) continue;
         if(debugmode > 10) AliInfo("============v0 survived!============");
-
+        if(pPos2 == 0 || pNeg2 ==0) continue;
         ((TH1F*)fOutputList->FindObject("fHistCosPA_lam"))->Fill(lV0cosPointAngle);
         ((TH1F*)fOutputList->FindObject("fHistDecayL_lam"))->Fill(decayLength);
         ((TH1F*)fOutputList->FindObject("fHistTauLa"))->Fill(cTauLa);
@@ -687,9 +687,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0_2"))->Fill(25);
         //remove all non-candidates
-            if(kshortCandidate == false) continue;
+        if(kshortCandidate == false) continue;
         if(debugmode > 10) AliInfo("============v0 survived!============");
-
+        if(pPos2 == 0 || pNeg2 ==0) continue;
+        
         ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
         if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
         ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength2);
