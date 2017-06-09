@@ -13,7 +13,7 @@ void runAnalysis(const char* pluginmode = "test")
 
     Int_t year = 2017;
     TString prod = "LHC17c";
-    TString pass = "cpass1_pass1";
+    TString pass = "muon_calo_pass1";
 
     Int_t runNmin=0;
     //Int_t runNmax=22;
