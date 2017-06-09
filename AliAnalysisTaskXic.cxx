@@ -288,6 +288,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fCentrality = fESD->GetCentrality();
     centralityV0M = fCentrality->GetCentralityPercentile("V0M");
     ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
+    cout << "?" << endl;
     if(debugmode > 100) AliInfo("after centrality check!");
     //------------------------------------------------
     //Step 3: Check for Vertex-Z position
