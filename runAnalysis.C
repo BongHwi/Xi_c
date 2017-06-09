@@ -54,14 +54,14 @@ void runAnalysis(const char* pluginmode = "test")
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
         plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data()));
-        plugin->SetDataPattern(Form("/%s/*AliESDs.root",pass.Data()));
+        plugin->SetDataPattern(Form("%s/*AliESDs.root",pass.Data()));
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
         plugin->AddRunNumber(270667);
         Int_t nruns = 0;/*
         for (Int_t irun=runNmin;irun<runNmax;irun++){
-            plugin->AddRunNumber((Int_t)runList[irun]);
+            plugin->AddRunNumber(runList[irun]);
             nruns++;
         }*/
         nruns++;
