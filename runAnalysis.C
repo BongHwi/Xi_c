@@ -67,6 +67,7 @@ void runAnalysis(const char* pluginmode = "test")
         plugin->SetTTL(40000);
         plugin->SetJDLName("Xic.jdl");
 
+        plugin->SetDefaultOutputs(kTRUE);
         plugin->SetOutputToRunNo(kTRUE);
         plugin->SetKeepLogs(kTRUE);
                plugin->SetMaxMergeStages(1);
