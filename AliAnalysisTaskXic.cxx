@@ -690,7 +690,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(kshortCandidate == false) continue;
         if(debugmode > 10) AliInfo("============v0 survived!============");
         if(pPos2 == 0 || pNeg2 ==0) continue;
-        
+
         ((TH1F*)fOutputList->FindObject("fHistCosPA_k0s"))->Fill(kV0cosPointAngle);
         if(debugmode > 10) AliInfo("============fHistCosPA_k0s!============");
         ((TH1F*)fOutputList->FindObject("fHistDecayL_k0s"))->Fill(decayLength2);
@@ -734,7 +734,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
     }
-    cout << "yeah!" << endl;
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
         //if(v0checklam[iV0]) cout << iV0 << " Lambda: "<< v0checklam[iV0] << endl;
