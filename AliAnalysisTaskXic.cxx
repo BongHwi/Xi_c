@@ -531,13 +531,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(33);
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
-
+        if(lambdaCandidate) v0checklam[iV0] = 1;
+        cout << "Lambda : " << v0checklam[iV0] << endl;
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
         //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
         //}
-        v0checklam[iV0] = 1;
     }
     for (Int_t jV0 = 0; jV0 < nv0s; jV0++){
         v0checkk0s[jV0] = 0;
@@ -724,13 +724,14 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 10) AliInfo("============ArmPod Kaon 2!============");
         if(debugmode > 100) AliInfo("05");
 
+        if(kshortCandidate) v0checkk0s[jV0] = 1;
+        cout << "K0s : " << v0checkk0s[jV0] << endl;
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
         ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0s);
         //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvK0ShortCut"))->Fill(lInvMassK0s); // After Cut
         if(debugmode > 10) AliInfo("============fill invmass!============");
         //}
-        v0checkk0s[jV0] = 1;
     }
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
