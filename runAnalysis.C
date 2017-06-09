@@ -1,25 +1,25 @@
 void LoadLibraries();
 void LoadMacros(Bool_t isMC=kFALSE);
 
-void runAnalysis(const char* pluginmode = "local")
+void runAnalysis(const char* pluginmode = "test")
 {
     Bool_t isMC = kFALSE;
     LoadLibraries();
-    
+
     gSystem->SetIncludePath("-I. -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include -I$ALICE_ROOT/STEER -I$ALICE_ROOT/ANALYSIS -g");
     gROOT->ProcessLine(".include $ROOTSYS/include");
     gROOT->ProcessLine(".include $ALICE_ROOT/include");
     gROOT->ProcessLine(".include $ALICE_PHYSICS/include");
-    
-    Int_t year = 2015;
-    TString prod = "LHC15n";
-    TString ppass = "pass3";
+
+    Int_t year = 2017;
+    TString prod = "LHC17c";
+    TString ppass = "cpass1_pass1";
 
     Int_t runNmin=0;
     //Int_t runNmax=22;
     Int_t runNmax=1;
     //Int_t runList[30]={244628, 244627, 244626, 244542, 244540, 244531, 244484, 244483, 244482, 244481, 244480, 244456, 244453, 244421, 244416, 244377, 244364, 244359, 244355, 244351, 244343, 244340};
-    Int_t runList[1]={244628}; //for test
+    Int_t runList[1]={270667}; //for test
 
     // create the analysis manager
     AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskXi_c");
@@ -42,15 +42,15 @@ void runAnalysis(const char* pluginmode = "local")
     } else {
 	printf("GRID MODE");
         AliAnalysisAlien *plugin = new AliAnalysisAlien();
-        
-        plugin->SetUser("blim"); 
+
+        plugin->SetUser("blim");
         gSystem->Setenv("alien_CLOSE_SE","working_disk_SE");
         plugin->SetAPIVersion("V1.1x");
         plugin->SetAliROOTVersion("v5-06-15");
         plugin->SetAliPhysicsVersion("v5-06-15-01");
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
-   
+
         plugin->SetGridDataDir("/alice/data/2015/LHC15n");
         plugin->SetDataPattern("/pass4/*AliESDs.root");
 	plugin->SetOutputFiles("AnalysisResults.root");
@@ -62,7 +62,7 @@ void runAnalysis(const char* pluginmode = "local")
             plugin->AddRunNumber((Int_t )runList[irun]);
         }
         plugin->SetSplitMaxInputFileNumber(10);
-        
+
         plugin->SetExecutable("Xic.sh");
         plugin->SetTTL(40000);
         plugin->SetJDLName("Xic.jdl");
@@ -80,7 +80,7 @@ void runAnalysis(const char* pluginmode = "local")
         mgr->SetGridHandler(plugin);
         plugin->SetRunMode(pluginmode);
         mgr->StartAnalysis("grid");
-        
+
     }
 }
 void LoadLibraries()
