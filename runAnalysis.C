@@ -1,7 +1,7 @@
 void LoadLibraries();
 void LoadMacros(Bool_t isMC=kFALSE);
 
-void runAnalysis(const char* pluginmode = "test")
+void runAnalysis(const char* pluginmode = "local")
 {
     Bool_t isMC = kFALSE;
     LoadLibraries();
