@@ -275,7 +275,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     if (isSelectedINT7) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(4);
     Bool_t isSelected = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kAny);
     if (isSelected) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(5);
-    if (!isSelected)Printf("There is events in kANY");
+    //if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
     //cout << "Event Accepted" << endl;
@@ -532,7 +532,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH2F*)fOutputList->FindObject("fArmPod_lambda_cut"))->Fill(v0i->AlphaV0(),v0i->PtArmV0());
         if(debugmode > 100) AliInfo("05");
         if(lambdaCandidate) v0checklam[iV0] = 1;
-        cout << "Lambda : " << v0checklam[iV0] << endl;
+        //cout << "Lambda : " << v0checklam[iV0] << endl;
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
         ((TH1F*)fOutputList->FindObject("fInvLambda"))->Fill(lInvMassLambda);
         //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
@@ -725,7 +725,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 100) AliInfo("05");
 
         if(kshortCandidate) v0checkk0s[jV0] = 1;
-        cout << "K0s : " << v0checkk0s[jV0] << endl;
+        //cout << "K0s : " << v0checkk0s[jV0] << endl;
         //if( (lOnFlyStatus == 0 && fkUseOnTheFly == kFALSE) || (lOnFlyStatus != 0 && fkUseOnTheFly == kTRUE ) ){
         ((TH1F*)fOutputList->FindObject("fInvK0Short"))->Fill(lInvMassK0s);
         //if (lInvMassK0s > l0Mass + 0.0008 || lInvMassK0s < l0Mass - 0.008) continue; // Mass window
