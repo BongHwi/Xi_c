@@ -278,7 +278,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     if (!isSelected)Printf("There is events in kANY");
     ////////////******* Do Event selecction *******////////////
     if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
-    cout << "Event Accepted" << endl;
+    //cout << "Event Accepted" << endl;
     ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
     if(debugmode > 100) AliInfo("after trigger selecction!");
     //------------------------------------------------
@@ -288,7 +288,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fCentrality = fESD->GetCentrality();
     centralityV0M = fCentrality->GetCentralityPercentile("V0M");
     ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
-    
+
     if(debugmode > 100) AliInfo("after centrality check!");
     //------------------------------------------------
     //Step 3: Check for Vertex-Z position
@@ -735,6 +735,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     }
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
+        if(v0checklam[iV0]) cout << iV0 << " Lambda: "<< v0checklam[iV0] << endl;
+        if(v0checkk0s[iV0]) cout << jV0 << " K0s: " << v0checkk0s[iV0] << endl;
         //cout << "Lambda: "<< v0checklam[iV0] << " K0s: "<< v0checkk0s[iV0] << endl;
         if(!(v0checklam[iV0] && v0checkk0s[iV0])) continue;
         AliESDv0 *v0i = ((AliESDEvent*)fESD)->GetV0(iV0);
