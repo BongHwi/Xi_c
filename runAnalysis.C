@@ -58,16 +58,16 @@ void runAnalysis(const char* pluginmode = "test")
         // MC has no prefix, data has prefix 000
         plugin->SetRunPrefix("000");
         // runnumber
-        //plugin->AddRunNumber(167813);
-        Int_t nruns = 0;
+        plugin->AddRunNumber(270667);
+        Int_t nruns = 0;/*
         for (Int_t irun=runNmin;irun<runNmax;irun++){
-            plugin->AddRunNumber((Int_t )runList[irun]);
+            plugin->AddRunNumber((Int_t)runList[irun]);
             nruns++;
-        }
+        }*/
+        nruns++;
         plugin->SetNrunsPerMaster(nruns);
         plugin->SetSplitMaxInputFileNumber(20);
         plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER -I$ALICE_ROOT/TOF -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include");
-
 
         plugin->SetExecutable("Xic.sh");
         plugin->SetTTL(72000);
