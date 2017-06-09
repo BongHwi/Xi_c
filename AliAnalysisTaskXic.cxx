@@ -758,7 +758,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
         angle = getAngle(tV0momi[0], tV0momi[1], tV0momi[2], tV0momj[0], tV0momj[1], tV0momj[2]);
 
-        cout << "ei: " << ei << ", ej: " << ej ", angle: "<< angle << endl;
+        cout << "ei: " << ei << ", ej: " << ej << ", angle: "<< angle << endl;
 
         fMass = k0Mass * k0Mass + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
         if (fMass <= 0) continue;
