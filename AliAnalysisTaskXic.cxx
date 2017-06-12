@@ -561,7 +561,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
           if(TMath::Abs(nsigpi) > 3) continue;
           double Ppi = sqrt(fPxpi*fPxpi+fPypi*fPypi+fPzpi*fPzpi);
-          ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPC_Pi"))->Fill(TMath::Log10(Ppi),Track->GetTPCsignal());
+          ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPC_Pi"))->Fill(TMath::Log10(Ppi),track->GetTPCsignal());
           Double_t ei = 0.;
           Double_t ej = 0.;
           Double_t angle = 0.;
