@@ -573,13 +573,13 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           Double_t fPt_result = 0.;
 
           ei = getEnergy(fMpi, fPxpi, fPxpi, fPxpi); // Energy of first particle(Pi+)
-          ej = getEnergy(l0Mass, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(Lambda)
+          ej = getEnergy(lInvMassLambda, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(Lambda)
 
           angle = getAngle(fPxpi, fPypi, fPzpi, tV0momi[0], tV0momi[1], tV0momi[2]);
 
           cout << "ei: " << ei << ", ej: " << ej << ", angle: "<< angle << endl;
 
-          fMass = fMpi * fMpi + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
+          fMass = fMpi * fMpi + lInvMassLambda * lInvMassLambda + 2.*ei * ej - 2.*angle;
           if (fMass <= 0) continue;
           fMass = sqrt(fMass);
 
