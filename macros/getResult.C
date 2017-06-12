@@ -1,5 +1,5 @@
 void getResult(){
-    TFile *filein = TFile::Open(ss+"/AnalysisResults.root","READ");
+    TFile *filein = TFile::Open("AnalysisResults.root","READ");
     //TFile *filein = TFile::Open("001/AnalysisResults.root","READ");
     if(filein==NULL) continue;
     TDirectoryFile *dir = (TDirectoryFile*)filein->Get("Xic");
