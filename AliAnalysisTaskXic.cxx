@@ -543,6 +543,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         for(Int_t i(0); i < iTracks; i++) { // new loop for pion+
           AliESDtrack* track = fESD->GetTrack(i);
           if(!track) continue;
+          Int_t fSign = 0;
           fSign = track->GetSign();
           if(fSign < 0) continue;  // only pion+
           if(!fTrackCut->AcceptTrack(track)) continue;
