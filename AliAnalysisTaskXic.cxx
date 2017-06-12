@@ -536,7 +536,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           Int_t fSign = 0;
           fSign = track->GetSign();
           if(fSign < 0) continue;  // only pion+
-          cout << "Find Pi+" << endl;
           if(!fTrackCuts->AcceptTrack(track)) continue;
           Int_t fTPCNcls_Pi = 0;
           track->GetTPCNcls();
@@ -557,7 +556,6 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           fPypi = track->Py();
           fPzpi = track->Pz();
           fMpi = track->M();
-          cout << "Get Info. of Pi+" << endl;
           Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
           if(TMath::Abs(nsigpi) > 3) continue;
           double Ppi = sqrt(fPxpi*fPxpi+fPypi*fPypi+fPzpi*fPzpi);
