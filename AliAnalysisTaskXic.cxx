@@ -153,7 +153,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH1F *fHistTauLa = new	TH1F("fHistTauLa", "Lifetime under Lambda mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
     TH2F *fHistBetheBlochTPCNeg_lam = new	TH2F("fHistBetheBlochTPCNeg_lam","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
   	TH2F *fHistBetheBlochTPCPos_lam = new	TH2F("fHistBetheBlochTPCPos_lam","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
-    // K0Short QA
+    // Pion QA
     TH1F *fNTPCcls_Pi = new TH1F("fNTPCcls_Pi","fNTPCcls_Pi",200,0,200);
       fNTPCcls_Pi->GetXaxis()->SetTitle("fNTPCcls_Pi");
     TH2F *fHistBetheBlochTPC_Pi = new	TH2F("fHistBetheBlochTPC_Pi","-dE/dX against Momentum from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
@@ -165,12 +165,10 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH2F *fArmPod_lambda_cut = new TH2F("fArmPod_lambda_cut", "Armenteros-Podolanski Plot after cut", 800, -1.0, 1.0, 100, 0, 0.25);
 
     // K0s
-    TH1F *fInvK0Short = new TH1F("fInvK0Short", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-      fInvK0Short->GetXaxis()->SetTitle("fInvK0Short");
-    TH1F *fInvK0Short_beforePID = new TH1F("fInvK0Short_beforePID", "Invariant mass distribution of K0s", 400, 0.3, 0.7);
-      fInvK0Short->GetXaxis()->SetTitle("fInvK0Short_beforePID");
-    TH1F *fInvK0ShortCut = new TH1F("fInvK0ShortCut", "Invariant mass distribution of K0s after mass window cut", 400, 0.3, 0.7);
-      fInvK0Short->GetXaxis()->SetTitle("fInvK0ShortCut");
+    TH1F *fInvPion = new TH1F("fInvPion", "Invariant mass distribution of K0s", 200, 0.1, 0.2);
+      fInvPion->GetXaxis()->SetTitle("fInvPion");
+    TH1F *fInvPionCut = new TH1F("fInvPionCut", "Invariant mass distribution of K0s after mass window cut", 200, 0.1, 0.2);
+      fInvPion->GetXaxis()->SetTitle("fInvPionCut");
     // Lambda0
     TH1F *fInvLambda = new TH1F("fInvLambda", "Invariant mass distribution of Lambda", 400, 1.0, 1.2);
       fInvLambda->GetXaxis()->SetTitle("fInvLambda");
@@ -211,9 +209,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList->Add(fArmPod_lambda);
     fOutputList->Add(fArmPod_lambda_cut);
 
-    fOutputList->Add(fInvK0Short);
-    //fOutputList->Add(fInvK0Short_beforePID);
-    fOutputList->Add(fInvK0ShortCut);
+    fOutputList->Add(fInvPion);
+    //fOutputList->Add(fInvPion_beforePID);
+    fOutputList->Add(fInvPionCut);
     fOutputList->Add(fInvLambda);
     //fOutputList->Add(fInvLambda_beforePID);
     fOutputList->Add(fInvLambdaCut);
@@ -308,7 +306,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     // mass constant
     static Double_t k0Mass = 0.497611;
     static Double_t l0Mass = 1.115683;
-    //static Double_t piMass = 0.13957;
+    static Double_t piMass = 0.13957;
     static Double_t prMass = 0.93827;
 
     // cut values
@@ -560,6 +558,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           if(TMath::Abs(nsigpi) > 3) continue;
           double Ppi = sqrt(fPxpi*fPxpi+fPypi*fPypi+fPzpi*fPzpi);
           ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPC_Pi"))->Fill(TMath::Log10(Ppi),track->GetTPCsignal());
+          ((TH1F*)fOutputList->FindObject("fInvPion"))->Fill(fMpi);
+          if(TMath::Abs(fMpi-piMass) > 0.05) continue;
+          ((TH1F*)fOutputList->FindObject("fInvPionCut"))->Fill(fMpi);
           Double_t ei = 0.;
           Double_t ej = 0.;
           Double_t angle = 0.;
