@@ -559,7 +559,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           double Ppi = sqrt(fPxpi*fPxpi+fPypi*fPypi+fPzpi*fPzpi);
           ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPC_Pi"))->Fill(TMath::Log10(Ppi),track->GetTPCsignal());
           ((TH1F*)fOutputList->FindObject("fInvPion"))->Fill(fMpi);
-          if(TMath::Abs(fMpi-piMass) > 0.05) continue;
+          if(TMath::Abs(fMpi-piMass) > 0.02) continue;
           ((TH1F*)fOutputList->FindObject("fInvPionCut"))->Fill(fMpi);
           Double_t ei = 0.;
           Double_t ej = 0.;
