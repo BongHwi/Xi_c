@@ -488,6 +488,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         if(debugmode > 51)((TH1F*)fOutputList->FindObject("hNofV0"))->Fill(25);
         //remove all non-candidates
         if(lambdaCandidate == false && antilambdaCandidate == false) continue;
+        if(antilambdaCandidate) continue; // for the Labmda_c
         if(debugmode > 10) AliInfo("============v0 survived!============");
         if(pPos2 == 0 || pNeg2 ==0) continue;
         ((TH1F*)fOutputList->FindObject("fHistCosPA_lam"))->Fill(lV0cosPointAngle);
@@ -561,6 +562,10 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           ((TH1F*)fOutputList->FindObject("fInvPion"))->Fill(fMpi);
           if(TMath::Abs(fMpi-piMass) > 0.02) continue;
           ((TH1F*)fOutputList->FindObject("fInvPionCut"))->Fill(fMpi);
+          double fDCAr = sqrt( pow(fx - lV0Position[0],2) + pow(fy - lV0Position[1],2) );
+          double fDCAz = fabs(fz - lV0Position[2]);
+          if(fDCAr > 0.1 || fDCAz > 0.1) continue; // DCA-r,z cut
+
           Double_t ei = 0.;
           Double_t ej = 0.;
           Double_t angle = 0.;
