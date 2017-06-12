@@ -154,14 +154,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     TH2F *fHistBetheBlochTPCNeg_lam = new	TH2F("fHistBetheBlochTPCNeg_lam","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
   	TH2F *fHistBetheBlochTPCPos_lam = new	TH2F("fHistBetheBlochTPCPos_lam","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
     // K0Short QA
-    TH1F *fNTPCcls_k0s = new TH1F("fNTPCcls_k0s","fNTPCcls_k0s",200,0,200);
-      fNTPCcls_k0s->GetXaxis()->SetTitle("fNTPCcls_k0s");
-    TH1F *fHistCosPA_k0s = new	TH1F("fHistCosPA_k0s", "Cosine of Pointing Angle of V0s; Cos PA; N(v0s)",202,0.8,1.01);
-    TH1F *fHistDCAV0Daughters_k0s = new	TH1F("fHistDCAV0Daughters_k0s", "DCA between V0 daughters; DCA (cm); N V0s", 100, 0, 2);
-    TH1F *fHistDecayL_k0s = new	TH1F("fHistDecayL_k0s", "Distance between V0 and PV; Distance(cm); N(v0s)",200,-0.1,30);
-    TH1F *fHistTauK0s = new	TH1F("fHistTauK0s", "Lifetime under k0s mass hypothesis; Lifetime(s); N(v0s)",200,0,100);
-    TH2F *fHistBetheBlochTPCNeg_k0s = new	TH2F("fHistBetheBlochTPCNeg_k0s","-dE/dX against Momentum for negative daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
-    TH2F *fHistBetheBlochTPCPos_k0s = new	TH2F("fHistBetheBlochTPCPos_k0s","-dE/dX against Momentum for positive daughter from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
+    TH1F *fNTPCcls_Pi = new TH1F("fNTPCcls_Pi","fNTPCcls_Pi",200,0,200);
+      fNTPCcls_Pi->GetXaxis()->SetTitle("fNTPCcls_Pi");
+    TH2F *fHistBetheBlochTPC_Pi = new	TH2F("fHistBetheBlochTPC_Pi","-dE/dX against Momentum from TPC; Log10 P (GeV); -dE/dx (keV/cm ?)",1000,-1,1,1000,0,200);
 
     // Armenteros-Podolanski Plot
     TH2F *fArmPod_kaon = new TH2F("fArmPod_kaon", "Armenteros-Podolanski Plot", 800, -1.0, 1.0, 100, 0, 0.25);
@@ -208,13 +203,8 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
   	fOutputList->Add(fHistTauLa);
 	  fOutputList->Add(fHistBetheBlochTPCNeg_lam);
     fOutputList->Add(fHistBetheBlochTPCPos_lam);
-    fOutputList->Add(fNTPCcls_k0s);
-    fOutputList->Add(fHistCosPA_k0s);
-    fOutputList->Add(fHistDCAV0Daughters_k0s);
-  	fOutputList->Add(fHistDecayL_k0s);
-  	fOutputList->Add(fHistTauK0s);
-	  fOutputList->Add(fHistBetheBlochTPCNeg_k0s);
-    fOutputList->Add(fHistBetheBlochTPCPos_k0s);
+    fOutputList->Add(fNTPCcls_Pi);
+	  fOutputList->Add(fHistBetheBlochTPC_Pi);
 
     fOutputList->Add(fArmPod_kaon);
     fOutputList->Add(fArmPod_kaon_cut);
@@ -548,6 +538,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           if(fSign < 0) continue;  // only pion+
           cout << "Find Pi+" << endl;
           if(!fTrackCuts->AcceptTrack(track)) continue;
+          Int_t fTPCNcls_Pi = 0;
+          track->GetTPCNcls();
+          ((TH1F*)fOutputList->FindObject("fNTPCcls_Pi"))->Fill(fTPCNcls_Pi);
           double fPt = 0.;
           double fx = 0.;
           double fy = 0.;
@@ -567,7 +560,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           cout << "Get Info. of Pi+" << endl;
           Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
           if(TMath::Abs(nsigpi) > 3) continue;
-
+          double Ppi = sqrt(fPxpi*fPxpi+fPypi*fPypi+fPzpi*fPzpi);
+          ((TH2F*)fOutputList->FindObject("fHistBetheBlochTPC_Pi"))->Fill(TMath::Log10(Ppi),Track->GetTPCsignal());
           Double_t ei = 0.;
           Double_t ej = 0.;
           Double_t angle = 0.;
