@@ -332,6 +332,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     const Int_t nv0sc = nv0s;
     Int_t v0checklam[nv0sc];
     Int_t v0checkk0s[nv0sc];
+    // loop for pion track
+    Int_t iTracks(fESD->GetNumberOfTracks());
 
     if(debugmode > 100) AliInfo("Starting V0 loop!");
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
@@ -538,6 +540,57 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //if (lInvMassLambda > l0Mass + 0.0008 || lInvMassLambda < l0Mass - 0.008) continue; // Mass window
         ((TH1F*)fOutputList->FindObject("fInvLambdaCut"))->Fill(lInvMassLambda); // After Cut
         //}
+        for(Int_t i(0); i < iTracks; i++) { // new loop for pion+
+          AliESDtrack* track = fESD->GetTrack(i);
+          if(!track) continue;
+          fSign = track->GetSign();
+          if(fSign < 0) continue;  // only pion+
+          if(!fTrackCut->AcceptTrack(track)) continue;
+          double fPt = 0.;
+          double fx = 0.;
+          double fy = 0.;
+          double fz = 0.;
+          double fPxpi = 0.;
+          double fPypi = 0.;
+          double fPzpi = 0.;
+          double fMpi = 0.;
+          fPt = track->Pt();
+          fx = track->GetX(); // will be used for DCA cut
+          fy = track->GetY();
+          fz = track->GetZ();
+          fPxpi = track->Px();
+          fPypi = track->Py();
+          fPzpi = track->Pz();
+          fMpi = track->M();
+          Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
+          if(TMath::Abs(nsigpi) > 3) continue;
+
+          Double_t ei = 0.;
+          Double_t ej = 0.;
+          Double_t angle = 0.;
+          Double_t fMass = 0.;
+          Double_t fPt_result = 0.;
+
+          ei = getEnergy(fMpi, fPxpi, fPxpi, fPxpi); // Energy of first particle(Pi+)
+          ej = getEnergy(l0Mass, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(Lambda)
+
+          angle = getAngle(fPxpi, fPypi, fPzpi, tV0momi[0], tV0momi[1], tV0momi[2]);
+
+          cout << "ei: " << ei << ", ej: " << ej << ", angle: "<< angle << endl;
+
+          fMass = fMpi * fMpi + l0Mass * l0Mass + 2.*ei * ej - 2.*angle;
+          if (fMass <= 0) continue;
+          fMass = sqrt(fMass);
+
+          tV0mom_result[0] = fPxpi + tV0momj[0];
+          tV0mom_result[1] = fPypi + tV0momj[1];
+          tV0mom_result[2] = fPxpi + tV0momj[2];
+          fPt_result = sqrt(pow(tV0mom_result[0], 2) + pow(tV0mom_result[1], 2));
+  
+          ((TH2F*)fOutputList2->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
+          ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
+        }
+
     }/*
     for (Int_t iV0 = 0; iV0 < nv0s; iV0++){
       for (Int_t jV0 = iV0; jV0 < nv0s; jV0++){
