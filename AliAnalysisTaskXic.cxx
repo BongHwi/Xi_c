@@ -586,7 +586,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           tV0mom_result[1] = fPypi + tV0momj[1];
           tV0mom_result[2] = fPxpi + tV0momj[2];
           fPt_result = sqrt(pow(tV0mom_result[0], 2) + pow(tV0mom_result[1], 2));
-  
+
           ((TH2F*)fOutputList2->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
           ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
         }
