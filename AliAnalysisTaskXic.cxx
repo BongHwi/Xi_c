@@ -543,6 +543,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         for(Int_t i(0); i < iTracks; i++) { // new loop for pion+
           AliESDtrack* track = fESD->GetTrack(i);
           if(!track) continue;
+          cout << "Find Pi+" << endl;
           Int_t fSign = 0;
           fSign = track->GetSign();
           if(fSign < 0) continue;  // only pion+
@@ -563,6 +564,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           fPypi = track->Py();
           fPzpi = track->Pz();
           fMpi = track->M();
+          cout << "Get Info. of Pi+" << endl;
           Float_t nsigpi= fabs(fPIDResponse->NumberOfSigmasTPC(track,AliPID::kPion));
           if(TMath::Abs(nsigpi) > 3) continue;
 
@@ -572,9 +574,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           Double_t fMass = 0.;
           Double_t fPt_result = 0.;
 
-          ei = getEnergy(fMpi, fPxpi, fPxpi, fPxpi); // Energy of first particle(Pi+)
+          ei = getEnergy(fMpi, fPxpi, fPypi, fPzpi); // Energy of first particle(Pi+)
           ej = getEnergy(lInvMassLambda, tV0momi[0], tV0momi[1], tV0momi[2]); // Energy of first particle(Lambda)
-
+          cout << "Energy" << endl;
           angle = getAngle(fPxpi, fPypi, fPzpi, tV0momi[0], tV0momi[1], tV0momi[2]);
 
           cout << "ei: " << ei << ", ej: " << ej << ", angle: "<< angle << endl;
@@ -585,7 +587,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
 
           tV0mom_result[0] = fPxpi + tV0momj[0];
           tV0mom_result[1] = fPypi + tV0momj[1];
-          tV0mom_result[2] = fPxpi + tV0momj[2];
+          tV0mom_result[2] = fPzpi + tV0momj[2];
           fPt_result = sqrt(pow(tV0mom_result[0], 2) + pow(tV0mom_result[1], 2));
 
           ((TH2F*)fOutputList2->FindObject("hInvMassWithPt"))->Fill(fMass, fPt_result); // with Pt
