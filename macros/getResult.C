@@ -7,4 +7,6 @@ void getResult(){
     TList *list_hist = (TList*)dir->Get("Histograms");
     (TH1F*)list_qa->FindObject("fInvLambda")->Draw();
     c1->SaveAs("./Figs/Lambda_Invmass.png");
+    (TH1F*)list_hist->FindObject("hInvMass")->Draw();
+    c1->SaveAs("./Figs/Lambdac_Invmass.png");
 }
