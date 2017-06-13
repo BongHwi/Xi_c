@@ -564,7 +564,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
           ((TH1F*)fOutputList->FindObject("fInvPionCut"))->Fill(fMpi);
           double fDCAr = sqrt( pow(fx - lV0Position[0],2) + pow(fy - lV0Position[1],2) );
           double fDCAz = fabs(fz - lV0Position[2]);
-          if(fDCAr > 0.1 || fDCAz > 0.1) continue; // DCA-r,z cut
+          //if(fDCAr > 0.1 || fDCAz > 0.1) continue; // DCA-r,z cut
 
           Double_t ei = 0.;
           Double_t ej = 0.;
