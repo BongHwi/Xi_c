@@ -48,19 +48,19 @@
 #include "AliESDv0.h"
 #include "AliKFParticle.h"
 #include "AliKFVertex.h"
-#include "AliAnalysisTaskXicMC.h"
+#include "AliAnalysisTaskXic.h"
 
-class AliAnalysisTaskXicMC;    // your analysis class
+class AliAnalysisTaskXic;    // your analysis class
 
 using namespace std;            // std namespace: so you can do things like 'cout'
 
-ClassImp(AliAnalysisTaskXicMC) // classimp: necessary for root
+ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
 double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
 void CheckChargeV0(AliESDv0 *v0);
 TString isMC = kTRUE;
 
-AliAnalysisTaskXicMC::AliAnalysisTaskXicMC() : AliAnalysisTaskSE(),
+AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
     fOutputList(0x0),
     fTrackCuts(0),
@@ -76,7 +76,7 @@ AliAnalysisTaskXicMC::AliAnalysisTaskXicMC() : AliAnalysisTaskSE(),
     // this is used by root for IO purposes, it needs to remain empty
 }
 //_____________________________________________________________________________
-AliAnalysisTaskXicMC::AliAnalysisTaskXicMC(const char* name) : AliAnalysisTaskSE(name),
+AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(name),
     fESD(0x0),
     fOutputList(0x0),
     fTrackCuts(0),
@@ -96,7 +96,7 @@ AliAnalysisTaskXicMC::AliAnalysisTaskXicMC(const char* name) : AliAnalysisTaskSE
     DefineOutput(2, TList::Class());    // Outputs
 }
 //_____________________________________________________________________________
-AliAnalysisTaskXicMC::~AliAnalysisTaskXicMC()
+AliAnalysisTaskXic::~AliAnalysisTaskXic()
 {
     // destructor
     if (fESD) delete fESD;
@@ -112,7 +112,7 @@ AliAnalysisTaskXicMC::~AliAnalysisTaskXicMC()
 
 }
 //_____________________________________________________________________________
-void AliAnalysisTaskXicMC::UserCreateOutputObjects()
+void AliAnalysisTaskXic::UserCreateOutputObjects()
 {
     // create output objects
     //
@@ -247,7 +247,7 @@ void AliAnalysisTaskXicMC::UserCreateOutputObjects()
     PostData(2, fOutputList2);
 }
 //_____________________________________________________________________________
-void AliAnalysisTaskXicMC::UserExec(Option_t *)
+void AliAnalysisTaskXic::UserExec(Option_t *)
 {
     Int_t debugmode = 0; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
     // Parameters used for cuts.
@@ -337,7 +337,7 @@ void AliAnalysisTaskXicMC::UserExec(Option_t *)
     PostData(2, fOutputList2);
 }
 //_____________________________________________________________________________
-void AliAnalysisTaskXicMC::Terminate(Option_t *)
+void AliAnalysisTaskXic::Terminate(Option_t *)
 {
     // terminate
     // called at the END of the analysis (when all events are processed)
