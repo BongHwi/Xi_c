@@ -45,7 +45,8 @@ void runAnalysis(const char* pluginmode = "local")
     if(pluginmode=="local") {
 	printf("LOCAL MODE");
         TChain* chain = new TChain("esdTree");
-        chain->Add("/home/blim/data/AliESDs.root");
+        //chain->Add("/home/blim/data/AliESDs.root"); // real data
+        chain->Add("/home/blim/data/MC/LHC15a2a/130360/AliESDs.root"); // MC data
         mgr->StartAnalysis("local", chain);
     } else {
 	printf("GRID MODE");
