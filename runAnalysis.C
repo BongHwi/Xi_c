@@ -144,16 +144,6 @@ void LoadMacros(Bool_t isMC)
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
     AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
 
-    // Load macro for physics selection
-    ::Info("AnalysisSetup", "Add physics selection");
-    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
-    AliPhysicsSelectionTask* physSelTask = AddTaskPhysicsSelection(isMC);
-    physSelTask->SelectCollisionCandidates(AliVEvent::kMB);
-
-    // Load macro for PID QA
-    gROOT->LoadMacro("$(ALICE_ROOT)/ANALYSIS/macros/AddTaskPIDqa.C ");
-    AddTaskPIDqa();
-
     // load the addtask macro
     gROOT->LoadMacro("AddXic.C");
 
