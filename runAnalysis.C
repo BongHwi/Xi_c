@@ -3,7 +3,7 @@ void LoadMacros(Bool_t isMC=kFALSE);
 
 void runAnalysis(const char* pluginmode = "local")
 {
-    Bool_t isMC = kFALSE;
+    Bool_t isMC = kTRUE;
     LoadLibraries();
 
     gSystem->SetIncludePath("-I. -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include -I$ALICE_ROOT/STEER -I$ALICE_ROOT/ANALYSIS -g");
@@ -59,8 +59,14 @@ void runAnalysis(const char* pluginmode = "local")
         plugin->SetAliROOTVersion("v5-06-15");
         plugin->SetAliPhysicsVersion("v5-06-15-01");
         plugin->SetNtestFiles(1);
-        plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
-        plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
+        if (!isMC){
+          plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
+          plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
+        }
+        else {
+          plugin->SetAdditionalLibs("AliAnalysisTaskXicMC.cxx AliAnalysisTaskXicMC.h");
+          plugin->SetAnalysisSource("AliAnalysisTaskXicMC.cxx");
+        }
 
         if (!isMC) plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data())); // Real data path
         else plugin->SetGridDataDir(Form("/alice/sim/%i/%s",year,MCprod.Data()));      // MC data path
@@ -123,7 +129,8 @@ void LoadLibraries()
 void LoadMacros(Bool_t isMC)
 {
     // compile the class (locally)
-    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
+    if(!isMC) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
+    else gROOT->LoadMacro("AliAnalysisTaskXicMC.cxx++g");
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
