@@ -190,10 +190,9 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
                                          2, 0, 2);
         fOutputList->Add(fHistSwappedV0Counter);
     }
-    if(fIsMC){
-      TH1F *fMultDistMC = new TH1F("fMultDistMC", "Multiplicity Distribution of MC", 200, 0, 20000);
-        fMultDistMC->GetXaxis()->SetTitle("Multiplicity");
-    }
+    TH1F *fMultDistMC = new TH1F("fMultDistMC", "Multiplicity Distribution of MC", 200, 0, 20000);
+      fMultDistMC->GetXaxis()->SetTitle("Multiplicity");
+
 
     // Analysis Results
     TH2F *hInvMassWithPt = new TH2F("hInvMassWithPt", "Invariant mass distribution vs Pt", 1000, 2.0, 3.0, 100, 0, 10);
