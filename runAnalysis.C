@@ -29,9 +29,10 @@ void runAnalysis(const char* pluginmode = "local")
     ((AliESDInputHandler *) esdH)->SetReadFriends(kFALSE);
     mgr->SetInputEventHandler(esdH);
 
+    AliMCEventHandler *mcHandler = NULL;
     if(isMC){
       ::Info("AnalysisSetup", "Creating MC handler");
-           AliMCEventHandler *mcHandler  = new AliMCEventHandler();
+           mcHandler  = new AliMCEventHandler();
            mgr->SetMCtruthEventHandler(mcHandler);
     }
 
