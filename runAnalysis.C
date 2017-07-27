@@ -135,12 +135,13 @@ void LoadMacros(Bool_t isMC)
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
-    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection();
+    Bool_t applyPileupCuts = kTRUE;
+    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection(isMC, applyPileupCuts);
 
     // Load macro for PID
     gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
     Bool_t tuneOnData = kTRUE;
-    Int_t recoPass = 2;
+    TString recoPass = "2";
     if(isMC) AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC, kTRUE, tuneOnData, recoPass);
     else AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);;
 
