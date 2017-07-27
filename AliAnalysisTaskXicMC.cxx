@@ -69,7 +69,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(kTRUE)
+    fIsMC(1)
 {
     // default constructor, don't allocate memory here!
     // this is used by root for IO purposes, it needs to remain empty
@@ -85,7 +85,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(kTRUE)
+    fIsMC(1)
 {
     // constructor
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
