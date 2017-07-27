@@ -13,6 +13,7 @@ void runAnalysis(const char* pluginmode = "local")
 
     Int_t year = 2017;
     TString prod = "LHC17c";
+    TString MCprod = "LHC15a2a";
     TString pass = "muon_calo_pass1";
 
     Int_t runNmin=0;
@@ -20,12 +21,19 @@ void runAnalysis(const char* pluginmode = "local")
     Int_t runNmax=1;
     //Int_t runList[30]={244628, 244627, 244626, 244542, 244540, 244531, 244484, 244483, 244482, 244481, 244480, 244456, 244453, 244421, 244416, 244377, 244364, 244359, 244355, 244351, 244343, 244340};
     Int_t runList[1]={270667}; //for test
+    Int_t MCrunList[1] = {130360};
 
     // create the analysis manager
     AliAnalysisManager *mgr = new AliAnalysisManager("AnalysisTaskXi_c");
     AliVEventHandler* esdH = new AliESDInputHandler();
     ((AliESDInputHandler *) esdH)->SetReadFriends(kFALSE);
     mgr->SetInputEventHandler(esdH);
+
+    if(isMC){
+      ::Info("AnalysisSetup", "Creating MC handler");
+           AliMCEventHandler *mcHandler  = new AliMCEventHandler();
+           mgr->SetMCtruthEventHandler(mcHandler);
+    }
 
     LoadMacros(isMC);
 
@@ -53,11 +61,13 @@ void runAnalysis(const char* pluginmode = "local")
         plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
         plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
 
-        plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data()));
+        if (!isMC) plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data())); // Real data path
+        else plugin->SetGridDataDir(Form("/alice/sim/%i/%s",year,MCprod.Data()));      // MC data path
         //plugin->SetDataPattern(Form("%s/*AliESDs.root",pass.Data()));
-        plugin->SetDataPattern(Form("/%s/*ESDs.root",pass.Data()));
+        if (!isMC) plugin->SetDataPattern(Form("/%s/*ESDs.root",pass.Data())); // Real data has production
+        else plugin->SetDataPattern(Form("/*ESDs.root"));                      // MC data doesn't have a production
         // MC has no prefix, data has prefix 000
-        plugin->SetRunPrefix("000");
+        if (!isMC) plugin->SetRunPrefix("000");
         // runnumber
         //plugin->AddRunNumber(270667);
         Int_t nruns = 0;
@@ -125,6 +135,16 @@ void LoadMacros(Bool_t isMC)
     // Load macro for centrality selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
     AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
+
+    // Load macro for physics selection
+    ::Info("AnalysisSetup", "Add physics selection");
+    gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
+    AliPhysicsSelectionTask* physSelTask = AddTaskPhysicsSelection(isMC);
+    physSelTask->SelectCollisionCandidates(AliVEvent::kMB);
+
+    // Load macro for PID QA
+    gROOT->LoadMacro("$(ALICE_ROOT)/ANALYSIS/macros/AddTaskPIDqa.C ");
+    AddTaskPIDqa();
 
     // load the addtask macro
     gROOT->LoadMacro("AddXic.C");
