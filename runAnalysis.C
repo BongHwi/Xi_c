@@ -138,7 +138,10 @@ void LoadMacros(Bool_t isMC)
 
     // Load macro for PID
     gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
-    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);
+    Bool_t tuneOnData = kTRUE;
+    Int_t recoPass = 2;
+    if(isMC) AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC, kTRUE, tuneOnData, recoPass);
+    else AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);;
 
     // Load macro for centrality selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
