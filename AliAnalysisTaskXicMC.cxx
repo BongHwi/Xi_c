@@ -58,7 +58,6 @@ ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
 double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
 double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
 void CheckChargeV0(AliESDv0 *v0);
-TString isMC = kTRUE;
 
 AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fESD(0x0),
@@ -70,7 +69,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(kFALSE)
+    fIsMC(kTRUE)
 {
     // default constructor, don't allocate memory here!
     // this is used by root for IO purposes, it needs to remain empty
@@ -86,7 +85,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(kFALSE)
+    fIsMC(kTRUE)
 {
     // constructor
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
@@ -191,7 +190,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
                                          2, 0, 2);
         fOutputList->Add(fHistSwappedV0Counter);
     }
-    if(isMC){
+    if(fIsMC){
       TH1F *fMultDistMC = new TH1F("fMultDistMC", "Multiplicity Distribution of MC", 200, 0, 20000);
         fMultDistMC->GetXaxis()->SetTitle("Multiplicity");
     }
@@ -231,7 +230,7 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList2->Add(hInvMassWithPt);
     fOutputList2->Add(hInvMass);
 
-    if(isMC){
+    if(fIsMC){
       fOutputList->Add(fMultDistMC);
     }
 
@@ -263,7 +262,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     fTrackCuts->SetAcceptKinkDaughters(kFALSE);
     fTrackCuts->SetRequireTPCRefit(kTRUE);
 
-    if(isMC) {
+    if(fIsMC) {
       AliMCEvent* fMCE = MCEvent(); // fMCE: MC event
       if (!fMCE) {
         Printf("ERROR: Could not retrieve MC event");
