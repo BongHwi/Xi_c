@@ -36,6 +36,8 @@ void runAnalysis(const char* pluginmode = "local")
     }
 
     LoadMacros(isMC);
+    // create an instance of your analysis task
+    AliAnalysisTaskXic *task = AddXic();
 
     if(!mgr->InitAnalysis()) return;
     //mgr->SetDebugLevel(2);
@@ -149,7 +151,5 @@ void LoadMacros(Bool_t isMC)
 
     // Load Create ESD chain macro
     //gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
-    // create an instance of your analysis task
-    AliAnalysisTaskXic *task = AddXic();
     printf("Macro Loading Complete");
 }
