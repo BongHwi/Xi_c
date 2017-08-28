@@ -141,6 +141,7 @@ void AliAnalysisTaskXic::XicInit()
   //
   fEventCounter=0;// event counter initialization
   cout<<"AliAnalysisTaskXic XicInit() call"<<endl;
+  fZvertexBins = 20;
 
   if(fMCcase) fEventsToMix = 0;
   else fEventsToMix = 40;
