@@ -3,6 +3,11 @@ void LoadMacros();
 
 void runAnalysis_KIAF(const char *dataset = "test1.list")
 {
+    TString name = "Xi_c test";
+    Bool_t fMCcase = kTRUE;
+    Bool_t fAODcase = kFALSE;
+    Int_t CutListOption = 0;
+    
     LoadLibraries();
     LoadMacros();
     // create the analysis manager
