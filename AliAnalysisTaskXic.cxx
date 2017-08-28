@@ -18,32 +18,52 @@
  *
  */
 
-#include <iostream>
-#include <math.h>
-#include "TChain.h"
-#include "TH1F.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TH3D.h"
-#include "TList.h"
+ #include <iostream>
+ #include <math.h>
+ #include "TChain.h"
+ #include "TFile.h"
+ #include "TKey.h"
+ #include "TObject.h"
+ #include "TObjString.h"
+ #include "TList.h"
+ #include "TTree.h"
+ #include "TH1F.h"
+ #include "TH1D.h"
+ #include "TH2D.h"
+ #include "TH3D.h"
+ #include "TProfile.h"
+ #include "TCanvas.h"
 
-#include "AliAnalysisTask.h"
-#include "AliAnalysisManager.h"
-#include "AliLog.h"
+ #include "AliAnalysisTask.h"
+ #include "AliAnalysisManager.h"
+ #include "AliLog.h"
 
-#include "AliVEvent.h"
-#include "AliVEventHandler.h"
-#include "AliESDEvent.h"
-#include "AliESDtrackCuts.h"
-#include "AliESDInputHandler.h"
-#include "AliV0vertexer.h"
-#include "AliCascadeVertexer.h"
-#include "AliCentrality.h"
+ #include "AliESDEvent.h"
+ #include "AliESDtrackCuts.h"
+ #include "AliESDInputHandler.h"
 
-#include "AliESDv0.h"
-#include "AliKFParticle.h"
-#include "AliKFVertex.h"
-#include "AliAnalysisTaskXic.h"
+ #include "AliAODEvent.h"
+ #include "AliAODInputHandler.h"
+
+ #include "AliVEvent.h"
+ #include "AliVEventHandler.h"
+ #include "AliCentrality.h"
+ #include "AliAODcascade.h"
+ #include "AliESDcascade.h"
+ #include "AliV0vertexer.h"
+ #include "AliCascadeVertexer.h"
+
+ #include "AliMCEventHandler.h" // MC
+ #include "AliMCEvent.h"        // MC
+ #include "AliMCParticle.h"     // MC
+ #include "AliStack.h"          // MC
+ #include "AliAODMCParticle.h"  // MC
+
+ #include "AliESDv0.h"
+ #include "AliKFParticle.h"
+ #include "AliKFVertex.h"
+ #include "AliAnalysisTaskXic.h"
+
 
 class AliAnalysisTaskXic;    // your analysis class
 
@@ -63,13 +83,17 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fCentrality(0),
     fTrackCut(0x0),
     fHistPt(0),
-    fHistSwappedV0Counter(0)
+    fHistSwappedV0Counter(0),
+    fMCcase(0),
+    fAODcase(0),
+    fEventCounter(0),
+    fCutList(0)
 {
     // default constructor, don't allocate memory here!
     // this is used by root for IO purposes, it needs to remain empty
 }
 //_____________________________________________________________________________
-AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(name),
+AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name, Bool_t AODdecision, Bool_t MCdecision, Int_t CutListOption) : AliAnalysisTaskSE(name),
     fESD(0x0),
     fOutputList(0x0),
     fTrackCuts(0),
@@ -78,7 +102,11 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     fCentrality(0),
     fTrackCut(0x0),
     fHistPt(0),
-    fHistSwappedV0Counter(0)
+    fHistSwappedV0Counter(0),
+    fMCcase(MCdecision),
+    fAODcase(AODdecision),
+    fEventCounter(0),
+    fCutList(CutListOption)
 {
     // constructor
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
@@ -102,6 +130,18 @@ AliAnalysisTaskXic::~AliAnalysisTaskXic()
     }
     if (fTrackCuts) delete fTrackCuts;
 
+}
+//_____________________________________________________________________________
+void AliAnalysisTaskXic::XicInit()
+{
+  //
+  //Inits cuts and analysis settings
+  //
+  fEventCounter=0;// event counter initialization
+  cout<<"AliAnalysisTaskXic XicInit() call"<<endl;
+
+  if(fMCcase) fEventsToMix = 0;
+  else fEventsToMix = 40;
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserCreateOutputObjects()
@@ -183,6 +223,14 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
                                          2, 0, 2);
         fOutputList->Add(fHistSwappedV0Counter);
     }
+    TH1F *fMultDistMC = new TH1F("fMultDistMC", "Multiplicity Distribution of MC", 200, 0, 20000);
+      fMultDistMC->GetXaxis()->SetTitle("Multiplicity");
+    TH3F *fVertexDistMC = new TH3F("fVertexDistMC", "Vertex Distribution", 20, -1, 1, 20, -1, 1, 60, -30, 30);
+      fVertexDistMC->GetXaxis()->SetTitle("X Vertex (cm)");
+      fVertexDistMC->GetYaxis()->SetTitle("Y Vertex (cm)");
+      fVertexDistMC->GetZaxis()->SetTitle("Z Vertex (cm)");
+    TH3F *fMCinputTotalXi1 = new TH3F("fMCinputTotalXi1","Invariant Mass Distribution", 100,0,10, 40,-2,2, 200,1.2,1.4);
+    TH3F *fMCinputTotalXibar1 = new TH3F("fMCinputTotalXibar1","Invariant Mass Distribution", 100,0,10, 40,-2,2, 200,1.2,1.4);
 
     // Analysis Results
     TH2F *hInvMassWithPt = new TH2F("hInvMassWithPt", "Invariant mass distribution vs Pt", 1000, 2.0, 3.0, 100, 0, 10);
@@ -219,6 +267,12 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList2->Add(hInvMassWithPt);
     fOutputList2->Add(hInvMass);
 
+    if(fMCcase){
+      fOutputList->Add(fMultDistMC);
+      fOutputList->Add(fVertexDistMC);
+      fOutputList->Add(fMCinputTotalXi1);
+      fOutputList->Add(fMCinputTotalXibar1);
+    }
     //------------------------------------------------
     // Particle Identification Setup
     //------------------------------------------------
@@ -233,6 +287,122 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
+    // Main loop
+    // Called for each event
+    cout<<"===========  Event # "<<fEventCounter+1<<"  ==========="<<endl;
+    fEventCounter++;
+
+    if(fAODcase) {cout<<"AODs not fully supported! Exiting event."<<endl; return;}
+    if(fAODcase) fAOD = dynamic_cast<AliAODEvent*> (InputEvent());
+    else fESD = dynamic_cast<AliESDEvent*> (InputEvent());
+
+    if(fAODcase) {if (!fAOD) {Printf("ERROR: fAOD not available"); return;}}
+    else {if (!fESD) {Printf("ERROR: fESD not available"); return;}}
+
+    // ESD Trigger Cut
+    if(!fAODcase){
+      if(!(((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected())) {
+        cout<<"Event Rejected"<<endl; return;
+      }
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    const AliAODVertex *PrimaryVertexAOD;
+    const AliESDVertex *PrimaryVertexESD;
+
+    AliAnalysisManager *man=AliAnalysisManager::GetAnalysisManager();
+    AliInputEventHandler* inputHandler = (AliInputEventHandler*) (man->GetInputEventHandler());
+    fPIDResponse = inputHandler->GetPIDResponse();
+
+    TClonesArray *mcArray       = 0x0;
+    //AliAODMCParticle *mcXi;
+    //AliAODMCParticle *mcXi_c;
+    AliMCEvent  *mcEvent        = 0x0;
+    AliStack    *mcstack        = 0x0;
+    TParticle   *MCLamD1esd     = 0x0;
+    TParticle   *MCLamD2esd     = 0x0;
+    TParticle   *MCLamesd       = 0x0;
+    TParticle   *MCXiesd        = 0x0;
+    TParticle   *MCXiStaresd    = 0x0;
+
+    Double_t px1,py1,pz1, px2,py2,pz2;
+    Double_t p1sq,p2sq,e1,e2,angle;
+    Double_t dca3d;
+    Float_t dca2[2];
+    Double_t xiVtx[3];//, xiStarVtx[3];
+    Double_t xiP[3], xiStarP[3];
+    Double_t xiCMom;
+    Double_t xiMass, xiStarMass;
+    Double_t xiPt, xiStarPt;
+    Double_t xiY, xiStarY;
+    Double_t xiCharge;
+    Double_t decayLengthXY;
+    Double_t pDaughter1[3];
+    Double_t pDaughter2[3];
+    Double_t xDaughter1[3];
+    Double_t xDaughter2[3];
+    //
+    Double_t bField=0;
+    UInt_t status=0;
+    Int_t positiveTracks=0, negativeTracks=0;
+    Int_t myTracks=0;
+    //
+    Double_t primaryVtx[3]={0};
+    Int_t mBin=0;
+    Int_t zBin=0;
+    Double_t zStep=2*10/Double_t(fZvertexBins), zStart=-10.;
+    //
+    Bool_t mcXiFilled=kFALSE;// So that mctracks are never used uninitialized
+
+    if(fMCcase){
+      if(fAODcase){
+        mcArray = (TClonesArray*)fAOD->FindListObject(AliAODMCParticle::StdBranchName());
+        if(!mcArray){
+  	cout<<"No MC particle branch found"<<endl;
+  	return;
+        }
+      }else {
+        //mcEvent = MCEvent();
+        //if (!mcEvent) {cout<<"ERROR: Could not retrieve MC event"<<endl; return;
+        if(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()){
+            if(static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) mcstack = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
+            if (!mcstack) {cout<<"ERROR: Could not retrieve the stack"<<endl; return;}
+        }
+      }
+    }
+
+    if(fAODcase){// AOD case
+      cout<<"Currently AOD Case is not supported."<<endl;
+    }else {// ESDs
+      ((TH1F*)fOutputList->FindObject("fMultDistMC"))->Fill(fESD->GetNumberOfTracks());
+      PrimaryVertexESD = fESD->GetPrimaryVertex();
+      if(!PrimaryVertexESD) {cout<<"ERROR: Could not retrieve Vertex"<<endl; return;}
+
+      primaryVtx[0]=PrimaryVertexESD->GetX();
+      primaryVtx[1]=PrimaryVertexESD->GetY();
+      primaryVtx[2]=PrimaryVertexESD->GetZ();
+      ((TH3F*)fOutputList->FindObject("fVertexDistMC"))->Fill(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
+
+      if(fMCcase){
+        /////////////////////////////////////////////////
+        // Lam mc input
+        /////////////////////////////////////////////////
+        for (Int_t it = 0; it < mcstack->GetNprimary(); it++) {
+          TParticle *mcInputTrack = ((AliMCParticle*)mcstack->Particle(it);
+          if (!mcInputTrack) {
+        	  Error("UserExec", "Could not receive track %d", it);
+        	  continue;
+        	}
+        }
+
+        // Xi
+      	if(mcInputTrack->GetPdgCode() == +kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXi1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
+      	if(mcInputTrack->GetPdgCode() == -kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXibar1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
+      }
+    }
+    if(0){
+
     Int_t debugmode = 0; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
     // Parameters used for cuts.
     double cutCosPa(0.998), cutcTau(2);
@@ -632,6 +802,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         ((TH1F*)fOutputList2->FindObject("hInvMass"))->Fill(fMass); // Cumulated
       }
     }*/
+  }
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
 }
