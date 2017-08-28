@@ -84,6 +84,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
+    fEventsToMix(0),
     fMCcase(0),
     fAODcase(0),
     fEventCounter(0),
@@ -103,6 +104,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name, Bool_t AODdecision, Boo
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
+    fEventsToMix(0),
     fMCcase(MCdecision),
     fAODcase(AODdecision),
     fEventCounter(0),
@@ -389,7 +391,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Lam mc input
         /////////////////////////////////////////////////
         for (Int_t it = 0; it < mcstack->GetNprimary(); it++) {
-          TParticle *mcInputTrack = ((AliMCParticle*)mcstack->Particle(it);
+          TParticle *mcInputTrack = ((AliMCParticle*)mcstack)->Particle(it);
           if (!mcInputTrack) {
         	  Error("UserExec", "Could not receive track %d", it);
         	  continue;

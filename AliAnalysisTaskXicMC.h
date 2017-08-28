@@ -33,6 +33,7 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
         virtual void            Terminate(Option_t* option);
 
     private:
+        void                    XicInit();      //! initialization of fixed values
         AliESDEvent*            fESD;         //! input event
         TList*                  fOutputList;  //! output list
         AliESDtrackCuts*        fTrackCuts;			// Track cuts

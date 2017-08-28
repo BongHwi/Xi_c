@@ -33,14 +33,16 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
         virtual void            Terminate(Option_t* option);
 
     private:
-        void                    XicInit();      //! initialization of fixed values
+        void                    XicInit();    //! initialization of fixed values
+        const char*             fname;        //! name of class
+        AliAODEvent*            fAOD;         //! AOD object
         AliESDEvent*            fESD;         //! input event
         TList*                  fOutputList;  //! output list
         AliESDtrackCuts*        fTrackCuts;			// Track cuts
 	      TList*                  fOutputList2; //! output list
         AliPIDResponse*         fPIDResponse; //! PID object
         AliCentrality*          fCentrality;  //! Centrality object
-        AliESDtrackCuts        *fTrackCut;   //! ESD track cuts
+        AliESDtrackCuts*        fTrackCut;   //! ESD track cuts
 
 
         TH1F*                   fHistPt;        //! dummy histogram
@@ -48,6 +50,7 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
         Bool_t                  fAODcase;       //! switch for AODs or ESDs
         Int_t                   fEventCounter;  //! The event counter
         Int_t                   fCutList;       //! Cut List option (mean values or systematic variations)
+        Int_t                   fEventsToMix;
 	TH1F    *fHistSwappedV0Counter;     					        //! Swapped V0 Counter
         AliAnalysisTaskXic(const AliAnalysisTaskXic&); // not implemented
         AliAnalysisTaskXic& operator=(const AliAnalysisTaskXic&); // not implemented
