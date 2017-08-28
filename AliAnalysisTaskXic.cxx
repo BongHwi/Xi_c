@@ -366,12 +366,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
   	return;
         }
       }else {
-        //mcEvent = MCEvent();
-        //if (!mcEvent) {cout<<"ERROR: Could not retrieve MC event"<<endl; return;
-        if(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()){
-            if(static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) mcstack = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
-            if (!mcstack) {cout<<"ERROR: Could not retrieve the stack"<<endl; return;}
-        }
+        mcEvent = MCEvent();
+        if (!mcEvent) {Printf("ERROR: Could not retrieve MC event"); return;}
+
+        mcstack = mcEvent->Stack();
+        if (!mcstack) {Printf("ERROR: Could not retrieve the stack"); return;}
       }
     }
 
