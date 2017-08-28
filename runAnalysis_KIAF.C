@@ -1,7 +1,7 @@
 void LoadLibraries();
 void LoadMacros();
 
-void runAnalysis_KIAF(const char *dataset = "test1.list") 
+void runAnalysis_KIAF(const char *dataset = "test1.list")
 {
     LoadLibraries();
     LoadMacros();
@@ -11,11 +11,11 @@ void runAnalysis_KIAF(const char *dataset = "test1.list")
     mgr->SetInputEventHandler(esdH);
 
     AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection();
-    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(kFALSE); 
+    AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(kFALSE);
     AliCentralitySelectionTask *taskCentrality = AddTaskCentrality();
 
     // create an instance of your analysis task
-    AliAnalysisTaskXic *task = AddXic();
+    AliAnalysisTaskXic *task = AddXic(name, fAODcase, fMCcase, CutListOption);
     mgr->PrintStatus();
     mgr->SetUseProgressBar(1, 25);
 
