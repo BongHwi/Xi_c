@@ -40,7 +40,7 @@ void runAnalysis(const char* pluginmode = "local")
            mgr->SetMCtruthEventHandler(mcHandler);
     }
 
-    LoadMacros(fMCcase);
+    LoadMacros(name, fAODcase, fMCcase, CutListOption);
 
     if(!mgr->InitAnalysis()) return;
     //mgr->SetDebugLevel(2);
@@ -131,7 +131,7 @@ void LoadLibraries()
     gSystem->Load("libANALYSISalice.so");
     printf("Library Loading Complete");
 }
-void LoadMacros(Bool_t fMCcase)
+void LoadMacros(TString name, Bool_t fAODcase, Bool_t fMCcase, Int_t CutListOption=0)
 {
     // compile the class (locally)
     gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
@@ -155,7 +155,7 @@ void LoadMacros(Bool_t fMCcase)
     // load the addtask macro
     gROOT->LoadMacro("AddXic.C");
     // create an instance of your analysis task
-    AliAnalysisTaskXic *task = AddXic(name, AODdecision, MCdecision, CutListOption);
+    AliAnalysisTaskXic *task = AddXic(name, fAODcase, fMCcase, CutListOption);
 
     // Load Create ESD chain macro
     //gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
