@@ -53,11 +53,9 @@
 #include "AliV0vertexer.h"
 #include "AliCascadeVertexer.h"
 
-#include "AliMCEventHandler.h" // MC
-#include "AliMCEvent.h"        // MC
-#include "AliMCParticle.h"     // MC
-#include "AliStack.h"          // MC
-#include "AliAODMCParticle.h"  // MC
+#include "AliMCEventHandler.h" // MC include "AliMCEvent.h"        // MC include
+#"AliMCParticle.h"     // MC include "AliStack.h"          // MC include
+#"AliAODMCParticle.h"  // MC
 
 #include "AliESDv0.h"
 #include "AliKFParticle.h"
@@ -366,7 +364,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         //if (!mcEvent) {cout<<"ERROR: Could not retrieve MC event"<<endl; return;
         if(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()){
             if(static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) mcstack = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
-        if (!mcstack) {cout<<"ERROR: Could not retrieve the stack"<<endl; return;}
+            if (!mcstack) {cout<<"ERROR: Could not retrieve the stack"<<endl; return;}
+        }
       }
     }
 
@@ -397,6 +396,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Xi
       	if(mcInputTrack->GetPdgCode() == +kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXi1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
       	if(mcInputTrack->GetPdgCode() == -kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXibar1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
+      }
     }
 
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
