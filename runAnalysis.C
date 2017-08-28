@@ -1,9 +1,12 @@
 void LoadLibraries();
-void LoadMacros(Bool_t isMC=kFALSE);
+void LoadMacros(Bool_t fMCcase=kFALSE);
 
 void runAnalysis(const char* pluginmode = "local")
 {
-    Bool_t isMC = kTRUE;
+    Bool_t fMCcase = kTRUE;
+    Bool_t fAODcase = kFALSE;
+    Int_t CutListOption = 0;
+
     LoadLibraries();
 
     gSystem->SetIncludePath("-I. -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_PHYSICS -I$ALICE_PHYSICS/include -I$ALICE_ROOT/STEER -I$ALICE_ROOT/ANALYSIS -g");
@@ -30,13 +33,13 @@ void runAnalysis(const char* pluginmode = "local")
     mgr->SetInputEventHandler(esdH);
 
     AliMCEventHandler *mcHandler = NULL;
-    if(isMC){
+    if(fMCcase){
       ::Info("AnalysisSetup", "Creating MC handler");
            mcHandler  = new AliMCEventHandler();
            mgr->SetMCtruthEventHandler(mcHandler);
     }
 
-    LoadMacros(isMC);
+    LoadMacros(fMCcase);
 
     if(!mgr->InitAnalysis()) return;
     //mgr->SetDebugLevel(2);
@@ -44,13 +47,13 @@ void runAnalysis(const char* pluginmode = "local")
     mgr->SetUseProgressBar(1, 25);
 
     if(pluginmode=="local") {
-	printf("LOCAL MODE");
+	     printf("LOCAL MODE");
         TChain* chain = new TChain("esdTree");
         //chain->Add("/home/blim/data/AliESDs.root"); // real data
         chain->Add("/home/blim/data/MC/LHC15a2a/130360/AliESDs.root"); // MC data
         mgr->StartAnalysis("local", chain);
     } else {
-	printf("GRID MODE");
+	     printf("GRID MODE");
         AliAnalysisAlien *plugin = new AliAnalysisAlien();
 
         plugin->SetRunMode(pluginmode);
@@ -60,7 +63,7 @@ void runAnalysis(const char* pluginmode = "local")
         plugin->SetAliROOTVersion("v5-06-15");
         plugin->SetAliPhysicsVersion("v5-06-15-01");
         plugin->SetNtestFiles(1);
-        if (!isMC){
+        if (!fMCcase){
           plugin->SetAdditionalLibs("AliAnalysisTaskXic.cxx AliAnalysisTaskXic.h");
           plugin->SetAnalysisSource("AliAnalysisTaskXic.cxx");
         }
@@ -69,13 +72,13 @@ void runAnalysis(const char* pluginmode = "local")
           plugin->SetAnalysisSource("AliAnalysisTaskXicMC.cxx");
         }
 
-        if (!isMC) plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data())); // Real data path
+        if (!fMCcase) plugin->SetGridDataDir(Form("/alice/data/%i/%s",year,prod.Data())); // Real data path
         else plugin->SetGridDataDir(Form("/alice/sim/%i/%s",year,MCprod.Data()));      // MC data path
         //plugin->SetDataPattern(Form("%s/*AliESDs.root",pass.Data()));
-        if (!isMC) plugin->SetDataPattern(Form("/%s/*ESDs.root",pass.Data())); // Real data has production
+        if (!fMCcase) plugin->SetDataPattern(Form("/%s/*ESDs.root",pass.Data())); // Real data has production
         else plugin->SetDataPattern(Form("/*ESDs.root"));                      // MC data doesn't have a production
         // MC has no prefix, data has prefix 000
-        if (!isMC) plugin->SetRunPrefix("000");
+        if (!fMCcase) plugin->SetRunPrefix("000");
         // runnumber
         //plugin->AddRunNumber(270667);
         Int_t nruns = 0;
@@ -127,23 +130,23 @@ void LoadLibraries()
     gSystem->Load("libANALYSISalice.so");
     printf("Library Loading Complete");
 }
-void LoadMacros(Bool_t isMC)
+void LoadMacros(Bool_t fMCcase)
 {
     // compile the class (locally)
-    if(!isMC) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
-    else gROOT->LoadMacro("AliAnalysisTaskXicMC.cxx++g");
+    if(!fMCcase) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
+    else gROOT->LoadMacro('AliAnalysisTaskXicMC.cxx++g("test",fAODcase,fMCcase,CutListOption)');
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
     Bool_t applyPileupCuts = kTRUE;
-    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection(isMC, applyPileupCuts);
+    AliPhysicsSelectionTask *physSelTask = AddTaskPhysicsSelection(fMCcase, applyPileupCuts);
 
     // Load macro for PID
     gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
     Bool_t tuneOnData = kTRUE;
     TString recoPass = "2";
-    if(isMC) AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC, kTRUE, tuneOnData, recoPass);
-    else AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(isMC);;
+    if(fMCcase) AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(fMCcase, kTRUE, tuneOnData, recoPass);
+    else AliAnalysisTask *fPIDResponse = AddTaskPIDResponse(fMCcase);;
 
     // Load macro for centrality selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskCentrality.C");
