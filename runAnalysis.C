@@ -3,7 +3,7 @@ void LoadMacros(Bool_t fMCcase=kFALSE);
 
 void runAnalysis(const char* pluginmode = "local")
 {
-    String_t name = "Xi_c test";
+    TString name = "Xi_c test";
     Bool_t fMCcase = kTRUE;
     Bool_t fAODcase = kFALSE;
     Int_t CutListOption = 0;
@@ -134,8 +134,7 @@ void LoadLibraries()
 void LoadMacros(Bool_t fMCcase)
 {
     // compile the class (locally)
-    if(!fMCcase) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
-    else gROOT->LoadMacro("AliAnalysisTaskXicMC.cxx++g");
+    gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
