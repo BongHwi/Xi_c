@@ -368,11 +368,11 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
   	return;
         }
       }else {
-        if(!AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()) cout << "no MCtruthevent hanlder" <<endl;
-        if(!static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) cout << "no MC event" << endl;
+        //if(!AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()) cout << "no MCtruthevent hanlder" <<endl;
+        //if(!static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) cout << "no MC event" << endl;
 
         //mcEvent = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
-        mcEvent = MCEvent();
+        mcEvent = fMCEvent;
         if (!mcEvent) {Printf("ERROR: Could not retrieve MC event"); return;}
       }
     }
