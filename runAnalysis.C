@@ -134,7 +134,7 @@ void LoadMacros(Bool_t fMCcase)
 {
     // compile the class (locally)
     if(!fMCcase) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
-    else gROOT->LoadMacro('AliAnalysisTaskXicMC.cxx++g("test",fAODcase,fMCcase,CutListOption)');
+    else gROOT->LoadMacro('AliAnalysisTaskXicMC.cxx++g');
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
