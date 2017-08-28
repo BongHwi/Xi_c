@@ -13,7 +13,7 @@
  * provided "as is" without express or implied warranty.                  *
  **************************************************************************/
 
-/* AliAnaysisTaskXic
+/* AliAnaysisTaskXicMC
  * test for commit4
  *
  */
@@ -21,45 +21,58 @@
 #include <iostream>
 #include <math.h>
 #include "TChain.h"
+#include "TFile.h"
+#include "TKey.h"
+#include "TObject.h"
+#include "TObjString.h"
+#include "TList.h"
+#include "TTree.h"
 #include "TH1F.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
-#include "TList.h"
+#include "TProfile.h"
+#include "TCanvas.h"
 
 #include "AliAnalysisTask.h"
 #include "AliAnalysisManager.h"
 #include "AliLog.h"
 
-#include "AliVEvent.h"
-#include "AliVEventHandler.h"
 #include "AliESDEvent.h"
 #include "AliESDtrackCuts.h"
 #include "AliESDInputHandler.h"
+
+#include "AliAODEvent.h"
+#include "AliAODInputHandler.h"
+
+#include "AliVEvent.h"
+#include "AliVEventHandler.h"
+#include "AliCentrality.h"
+#include "AliAODcascade.h"
+#include "AliESDcascade.h"
 #include "AliV0vertexer.h"
 #include "AliCascadeVertexer.h"
-#include "AliCentrality.h"
 
 #include "AliMCEventHandler.h" // MC
 #include "AliMCEvent.h"        // MC
 #include "AliMCParticle.h"     // MC
 #include "AliStack.h"          // MC
+#include "AliAODMCParticle.h"  // MC
 
 #include "AliESDv0.h"
 #include "AliKFParticle.h"
 #include "AliKFVertex.h"
 #include "AliAnalysisTaskXic.h"
 
+#define PI 3.1415927
+
 class AliAnalysisTaskXic;    // your analysis class
 
 using namespace std;            // std namespace: so you can do things like 'cout'
 
 ClassImp(AliAnalysisTaskXic) // classimp: necessary for root
-double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz);
-double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2);
-void CheckChargeV0(AliESDv0 *v0);
 
-AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
+AliAnalysisTaskXic::AliAnalysisTaskXicMC() : AliAnalysisTaskSE(),
     fESD(0x0),
     fOutputList(0x0),
     fTrackCuts(0),
@@ -69,13 +82,16 @@ AliAnalysisTaskXic::AliAnalysisTaskXic() : AliAnalysisTaskSE(),
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(1)
+    fMCcase(0),
+    fAODcase(0),
+    fEventCounter(0),
+    fCutList(0)
 {
     // default constructor, don't allocate memory here!
     // this is used by root for IO purposes, it needs to remain empty
 }
 //_____________________________________________________________________________
-AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(name),
+AliAnalysisTaskXic::AliAnalysisTaskXicMC(const char* name, Bool_t AODdecision, Bool_t MCdecision, Int_t CutListOption) : AliAnalysisTaskSE(name),
     fESD(0x0),
     fOutputList(0x0),
     fTrackCuts(0),
@@ -85,7 +101,10 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     fTrackCut(0x0),
     fHistPt(0),
     fHistSwappedV0Counter(0),
-    fIsMC(1)
+    fMCcase(MCdecision),
+    fAODcase(AODdecision),
+    fEventCounter(0),
+    fCutList(CutListOption)
 {
     // constructor
     DefineInput(0, TChain::Class());    // define the input of the analysis: in this case we take a 'chain' of events
@@ -95,7 +114,7 @@ AliAnalysisTaskXic::AliAnalysisTaskXic(const char* name) : AliAnalysisTaskSE(nam
     DefineOutput(2, TList::Class());    // Outputs
 }
 //_____________________________________________________________________________
-AliAnalysisTaskXic::~AliAnalysisTaskXic()
+AliAnalysisTaskXic::~AliAnalysisTaskXicMC()
 {
     // destructor
     if (fESD) delete fESD;
@@ -109,6 +128,18 @@ AliAnalysisTaskXic::~AliAnalysisTaskXic()
     }
     if (fTrackCuts) delete fTrackCuts;
 
+}
+//_____________________________________________________________________________
+void AliAnalysisTaskXic::XicInit()
+{
+  //
+  //Inits cuts and analysis settings
+  //
+  fEventCounter=0;// event counter initialization
+  cout<<"AliAnalysisTaskXic XicInit() call"<<endl;
+
+  if(fMCcase) fEventsToMix = 0;
+  else fEventsToMix = 40;
 }
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserCreateOutputObjects()
@@ -192,6 +223,12 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     }
     TH1F *fMultDistMC = new TH1F("fMultDistMC", "Multiplicity Distribution of MC", 200, 0, 20000);
       fMultDistMC->GetXaxis()->SetTitle("Multiplicity");
+    TH3F *fVertexDistMC = new TH3F("fVertexDistMC", "Vertex Distribution", 20, -1, 1, 20, -1, 1, 60, -30, 30);
+      fVertexDistMC->GetXaxis()->SetTitle("X Vertex (cm)");
+      fVertexDistMC->GetYaxis()->SetTitle("Y Vertex (cm)");
+      fVertexDistMC->GetZaxis()->SetTitle("Z Vertex (cm)");
+    TH3F *fMCinputTotalXi1 = new TH3F("fMCinputTotalXi1","Invariant Mass Distribution", 100,0,10, 40,-2,2, 200,1.2,1.4);
+    TH3F *fMCinputTotalXibar1 = new TH3F("fMCinputTotalXibar1","Invariant Mass Distribution", 100,0,10, 40,-2,2, 200,1.2,1.4);
 
 
     // Analysis Results
@@ -229,8 +266,11 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
     fOutputList2->Add(hInvMassWithPt);
     fOutputList2->Add(hInvMass);
 
-    if(fIsMC){
+    if(fMCcase){
       fOutputList->Add(fMultDistMC);
+      fOutputList->Add(fVertexDistMC);
+      fOutputList->Add(fMCinputTotalXi1);
+      fOutputList->Add(fMCinputTotalXibar1);
     }
 
     //------------------------------------------------
@@ -247,89 +287,117 @@ void AliAnalysisTaskXic::UserCreateOutputObjects()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserExec(Option_t *)
 {
-    Int_t debugmode = 0; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
-    // Parameters used for cuts.
-    double cutCosPa(0.998), cutcTau(2);
-      double cutNImpact(-999), cutDCA(0.9);
-    double cutBetheBloch(3);
-    double cutMinNClustersTPC(70), cutMaxChi2PerClusterTPC(-999);
-    double cutEta(0.8);
+    // Main loop
+    // Called for each event
+    cout<<"===========  Event # "<<fEventCounter+1<<"  ==========="<<endl;
+    fEventCounter++;
 
-    //Track Cuts set here
-    if(cutMinNClustersTPC != -999) (fTrackCuts->SetMinNClustersTPC(int(cutMinNClustersTPC)));
-    if(cutMaxChi2PerClusterTPC != -999) fTrackCuts->SetMaxChi2PerClusterTPC(cutMaxChi2PerClusterTPC);
-    fTrackCuts->SetAcceptKinkDaughters(kFALSE);
-    fTrackCuts->SetRequireTPCRefit(kTRUE);
+    if(fAODcase) {cout<<"AODs not fully supported! Exiting event."<<endl; return;}
+    if(fAODcase) fAOD = dynamic_cast<AliAODEvent*> (InputEvent());
+    else fESD = dynamic_cast<AliESDEvent*> (InputEvent());
 
-    if(fIsMC) {
-      AliMCEvent* fMCE = MCEvent(); // fMCE: MC event
-      if (!fMCE) {
-        Printf("ERROR: Could not retrieve MC event");
-        return;
-      }
-      AliStack* stack = fMCE->Stack();
-      if(!stack){
-        Printf("ERROR: Can't load stack from MC Event");
-        return;
+    if(fAODcase) {if (!fAOD) {Printf("ERROR: fAOD not available"); return;}}
+    else {if (!fESD) {Printf("ERROR: fESD not available"); return;}}
+
+    // ESD Trigger Cut
+    if(!fAODcase){
+      if(!(((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected())) {
+        cout<<"Event Rejected"<<endl; return;
       }
     }
-    else{
-      fESD = dynamic_cast<AliESDEvent*>(InputEvent());
-      if (!fESD) {Printf("ERROR: fESD not available"); return;}
-    }
-    if(debugmode > 100) AliInfo("test!");
-    //------------------------------------------------
-    //Step 1: Check for selected Trigger
-    //------------------------------------------------
-    Bool_t isSelectedMB = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & AliVEvent::kMB);
-    if (isSelectedMB) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(1);
-    Bool_t isSelectedkCentral = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & AliVEvent::kCentral);
-    if (isSelectedkCentral) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(2);
-    Bool_t isSelectedkSemiCentral = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() & (AliVEvent::kSemiCentral));
-    if (isSelectedkSemiCentral) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(3);
-    Bool_t isSelectedINT7 = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kINT7);
-    if (isSelectedINT7) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(4);
-    Bool_t isSelected = (((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()))->IsEventSelected() && AliVEvent::kAny);
-    if (isSelected) ((TH1F*)fOutputList->FindObject("hEventSelecInfo"))->Fill(5);
-    //if (!isSelected)Printf("There is events in kANY");
-    ////////////******* Do Event selecction *******////////////
-    if (!(isSelectedINT7 | isSelectedMB | isSelectedkCentral | isSelectedkSemiCentral)) {cout << "Event Rejected" << endl; return;}
-    //cout << "Event Accepted" << endl;
-    ((TH1F*)fOutputList->FindObject("fMultDist"))->Fill(fESD->GetNumberOfTracks());
-    if(debugmode > 100) AliInfo("after trigger selecction!");
-    //------------------------------------------------
-    //Step 2: Check for centrality for Pb-Pb
-    //------------------------------------------------
-    Float_t  centralityV0M = -100;
-    fCentrality = fESD->GetCentrality();
-    centralityV0M = fCentrality->GetCentralityPercentile("V0M");
-    ((TH1F*)fOutputList->FindObject("hCentrality"))->Fill(centralityV0M);
 
-    if(debugmode > 100) AliInfo("after centrality check!");
-    //------------------------------------------------
-    //Step 3: Check for Vertex-Z position
-    //------------------------------------------------
+    ///////////////////////////////////////////////////////////
+    const AliAODVertex *PrimaryVertexAOD;
     const AliESDVertex *PrimaryVertexESD;
-    PrimaryVertexESD = fESD->GetPrimaryVertex();
-    //if(!PrimaryVertexESD) return;
-    //if(PrimaryVertexESD->GetNContributors() < 1) return;
 
-    Double_t primaryVtx[3] = {0};
-    primaryVtx[0] = PrimaryVertexESD->GetX(); // call primary vertex position of X
-    primaryVtx[1] = PrimaryVertexESD->GetY(); // call primary vertex position of Y
-    primaryVtx[2] = PrimaryVertexESD->GetZ(); // call primary vertex position of Z
-    ((TH3F*)fOutputList->FindObject("fVertexDistXYZ"))->Fill(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
-    ////////////******* DO Vertex-Z selecction *******////////////
-    if (fabs(primaryVtx[2]) > 10.) return;
-    if(debugmode > 100) AliInfo("after Vertex-Z position check!");
-    //------------------------------------------------
-    //Step 4: Check for SPD Pileup
-    //------------------------------------------------
-    if (fESD->IsPileupFromSPD()) return; // Reject Pile-up events
+    AliAnalysisManager *man=AliAnalysisManager::GetAnalysisManager();
+    AliInputEventHandler* inputHandler = (AliInputEventHandler*) (man->GetInputEventHandler());
+    fPIDResponse = inputHandler->GetPIDResponse();
 
-    //------------------------------------------------
-    //Step 5: MC Loop
-    //------------------------------------------------
+    TClonesArray *mcArray       = 0x0;
+    //AliAODMCParticle *mcXi;
+    //AliAODMCParticle *mcXi_c;
+    AliMCEvent  *mcEvent        = 0x0;
+    AliStack    *mcstack        = 0x0;
+    TParticle   *MCLamD1esd     = 0x0;
+    TParticle   *MCLamD2esd     = 0x0;
+    TParticle   *MCLamesd       = 0x0;
+    TParticle   *MCXiesd        = 0x0;
+    TParticle   *MCXiStaresd    = 0x0;
+
+    Double_t px1,py1,pz1, px2,py2,pz2;
+    Double_t p1sq,p2sq,e1,e2,angle;
+    Double_t dca3d;
+    Float_t dca2[2];
+    Double_t xiVtx[3];//, xiStarVtx[3];
+    Double_t xiP[3], xiStarP[3];
+    Double_t xiCMom;
+    Double_t xiMass, xiStarMass;
+    Double_t xiPt, xiStarPt;
+    Double_t xiY, xiStarY;
+    Double_t xiCharge;
+    Double_t decayLengthXY;
+    Double_t pDaughter1[3];
+    Double_t pDaughter2[3];
+    Double_t xDaughter1[3];
+    Double_t xDaughter2[3];
+    //
+    Double_t bField=0;
+    UInt_t status=0;
+    Int_t positiveTracks=0, negativeTracks=0;
+    Int_t myTracks=0;
+    //
+    Double_t primaryVtx[3]={0};
+    Int_t mBin=0;
+    Int_t zBin=0;
+    Double_t zStep=2*10/Double_t(fZvertexBins), zStart=-10.;
+    //
+    Bool_t mcXiFilled=kFALSE;// So that mctracks are never used uninitialized
+
+    if(fMCcase){
+      if(fAODcase){
+        mcArray = (TClonesArray*)fAOD->FindListObject(AliAODMCParticle::StdBranchName());
+        if(!mcArray){
+  	cout<<"No MC particle branch found"<<endl;
+  	return;
+        }
+      }else {
+        //mcEvent = MCEvent();
+        //if (!mcEvent) {cout<<"ERROR: Could not retrieve MC event"<<endl; return;
+        if(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()){
+            if(static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) mcstack = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
+        if (!mcstack) {cout<<"ERROR: Could not retrieve the stack"<<endl; return;}
+      }
+    }
+
+    if(fAODcase){// AOD case
+      cout<<"Currently AOD Case is not supported."<<endl;
+    }else {// ESDs
+      ((TH1F*)fOutputList->FindObject("fMultDistMC"))->Fill(fESD->GetNumberOfTracks());
+      PrimaryVertexESD = fESD->GetPrimaryVertex();
+      if(!PrimaryVertexESD) {cout<<"ERROR: Could not retrieve Vertex"<<endl; return;}
+
+      primaryVtx[0]=PrimaryVertexESD->GetX();
+      primaryVtx[1]=PrimaryVertexESD->GetY();
+      primaryVtx[2]=PrimaryVertexESD->GetZ();
+      ((TH3F*)fOutputList->FindObject("fVertexDistMC"))->Fill(primaryVtx[0], primaryVtx[1], primaryVtx[2]);
+
+      if(fMCcase){
+        /////////////////////////////////////////////////
+        // Lam mc input
+        /////////////////////////////////////////////////
+        for (Int_t it = 0; it < mcstack->GetNprimary(); it++) {
+          TParticle *mcInputTrack = ((AliMCParticle*)mcstack->Particle(it);
+          if (!mcInputTrack) {
+        	  Error("UserExec", "Could not receive track %d", it);
+        	  continue;
+        	}
+        }
+
+        // Xi
+      	if(mcInputTrack->GetPdgCode() == +kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXi1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
+      	if(mcInputTrack->GetPdgCode() == -kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXibar1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
+    }
 
     PostData(1, fOutputList);                           // stream the results the analysis of this event to
     PostData(2, fOutputList2);
@@ -341,68 +409,3 @@ void AliAnalysisTaskXic::Terminate(Option_t *)
     // called at the END of the analysis (when all events are processed)
 }
 //_____________________________________________________________________________
-
-double getEnergy(Double_t trueMass, Double_t Px, Double_t Py, Double_t Pz)
-{
-    return TMath::Sqrt(trueMass * trueMass + Px * Px + Py * Py + Pz * Pz);
-}
-double getAngle(Double_t Px1, Double_t Py1, Double_t Pz1, Double_t Px2, Double_t Py2, Double_t Pz2)
-{
-    return Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2;
-}
-void CheckChargeV0(AliESDv0 *v0)
-{
-    // This function is copied from PWGLF/STRANGENESS/LambdaK0/AliAnalysisTaskExtractV0.cxx
-    // This function checks charge of negative and positive daughter tracks.
-    // If incorrectly defined (onfly vertexer), swaps out.
-    if ( v0->GetParamN()->Charge() > 0 && v0->GetParamP()->Charge() < 0 ) {
-        //V0 daughter track swapping is required! Note: everything is swapped here... P->N, N->P
-        Long_t lCorrectNidx = v0->GetPindex();
-        Long_t lCorrectPidx = v0->GetNindex();
-        Double32_t    lCorrectNmom[3];
-        Double32_t    lCorrectPmom[3];
-        v0->GetPPxPyPz( lCorrectNmom[0], lCorrectNmom[1], lCorrectNmom[2] );
-        v0->GetNPxPyPz( lCorrectPmom[0], lCorrectPmom[1], lCorrectPmom[2] );
-        AliExternalTrackParam lCorrectParamN(
-            v0->GetParamP()->GetX() ,
-            v0->GetParamP()->GetAlpha() ,
-            v0->GetParamP()->GetParameter() ,
-            v0->GetParamP()->GetCovariance()
-        );
-        AliExternalTrackParam lCorrectParamP(
-            v0->GetParamN()->GetX() ,
-            v0->GetParamN()->GetAlpha() ,
-            v0->GetParamN()->GetParameter() ,
-            v0->GetParamN()->GetCovariance()
-        );
-        lCorrectParamN.SetMostProbablePt( v0->GetParamP()->GetMostProbablePt() );
-        lCorrectParamP.SetMostProbablePt( v0->GetParamN()->GetMostProbablePt() );
-        //Get Variables___________________________________________________
-        Double_t lDcaV0Daughters = v0 -> GetDcaV0Daughters();
-        Double_t lCosPALocal     = v0 -> GetV0CosineOfPointingAngle();
-        Bool_t lOnFlyStatusLocal = v0 -> GetOnFlyStatus();
-        //Create Replacement Object_______________________________________
-        AliESDv0 *v0correct = new AliESDv0(lCorrectParamN, lCorrectNidx, lCorrectParamP, lCorrectPidx);
-        v0correct->SetDcaV0Daughters          ( lDcaV0Daughters   );
-        v0correct->SetV0CosineOfPointingAngle ( lCosPALocal       );
-        v0correct->ChangeMassHypothesis       ( kK0Short          );
-        v0correct->SetOnFlyStatus             ( lOnFlyStatusLocal );
-        //Reverse Cluster info..._________________________________________
-        v0correct->SetClusters( v0->GetClusters( 1 ), v0->GetClusters ( 0 ) );
-        *v0 = *v0correct;
-        //Proper cleanup..._______________________________________________
-        v0correct->Delete();
-        v0correct = 0x0;
-        //Just another cross-check and output_____________________________
-        if ( v0->GetParamN()->Charge() > 0 && v0->GetParamP()->Charge() < 0 ) {
-            //AliWarning("Found Swapped Charges, tried to correct but something FAILED!");
-        } else {
-            //AliWarning("Found Swapped Charges and fixed.");
-        }
-        //________________________________________________________________
-    } else {
-        //Don't touch it! ---
-        //Printf("Ah, nice. Charges are already ordered...");
-    }
-    return;
-  }
