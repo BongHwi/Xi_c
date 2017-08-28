@@ -149,6 +149,8 @@ void AliAnalysisTaskXic::XicInit()
 //_____________________________________________________________________________
 void AliAnalysisTaskXic::UserCreateOutputObjects()
 {
+    XicInit(); // Initialize settings
+
     // create output objects
     //
     // this function is called ONCE at the start of your analysis (RUNTIME)
@@ -366,11 +368,8 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
   	return;
         }
       }else {
-        mcEvent = MCEvent();
+        mcEvent = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
         if (!mcEvent) {Printf("ERROR: Could not retrieve MC event"); return;}
-
-        mcstack = mcEvent->Stack();
-        if (!mcstack) {Printf("ERROR: Could not retrieve the stack"); return;}
       }
     }
 
@@ -403,6 +402,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
       }
     }
   }
+  //////////////////////////////////////////////////////////////////////////
     if(0){
 
     Int_t debugmode = 0; // for debuging, 101 for general debuging, 51 for specific debuging, 11 for only check v0 survived
