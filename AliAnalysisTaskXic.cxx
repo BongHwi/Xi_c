@@ -391,7 +391,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         // Lam mc input
         /////////////////////////////////////////////////
         for (Int_t it = 0; it < mcstack->GetNprimary(); it++) {
-          TParticle *mcInputTrack = ((AliMCParticle*)mcstack)->Particle(it);
+          TParticle *mcInputTrack = (TParticle*)mcstack->Particle(it);
           if (!mcInputTrack) {
         	  Error("UserExec", "Could not receive track %d", it);
         	  continue;
