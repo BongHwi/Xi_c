@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-//                                                               //            
+//                                                               //
 // AddXic                                                        //
 // Author: Redmer A. Bertens, Utrecht University, 2012           //
 // Modified: Bong-Hwi Lim, Pusan National University, 2017       //
@@ -7,13 +7,13 @@
 ///////////////////////////////////////////////////////////////////
 class AliAnalysisDataContainer;
 
-AliAnalysisTaskXic* AddXic(TString name = "name")
+AliAnalysisTaskXic* AddXic(TString name = "name", Bool_t AODdecision, Bool_t MCdecision, Int_t CutListOption=0)
 {
     AliAnalysisManager *mgr = AliAnalysisManager::GetAnalysisManager();
     if (!mgr) {
         return 0x0;
     }
-    // get the input event handler, again via a static method. 
+    // get the input event handler, again via a static method.
     // this handler is part of the managing system and feeds events
     // to your task
     if (!mgr->GetInputEventHandler()) {
@@ -23,7 +23,7 @@ AliAnalysisTaskXic* AddXic(TString name = "name")
     TString fileName = AliAnalysisManager::GetCommonFileName();
     fileName += ":Xic";      // create a subfolder in the file
     // now we create an instance of your task
-    AliAnalysisTaskXic* task = new AliAnalysisTaskXic(name.Data());   
+    AliAnalysisTaskXic* task = new AliAnalysisTaskXic(name.Data(),AODdecision,MCdecision,CutListOption);
     if(!task) return 0x0;
     // add your task to the manager
     mgr->AddTask(task);
