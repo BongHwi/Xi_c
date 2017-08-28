@@ -3,6 +3,7 @@ void LoadMacros(Bool_t fMCcase=kFALSE);
 
 void runAnalysis(const char* pluginmode = "local")
 {
+    String_t name = "Xi_c test";
     Bool_t fMCcase = kTRUE;
     Bool_t fAODcase = kFALSE;
     Int_t CutListOption = 0;
@@ -134,7 +135,7 @@ void LoadMacros(Bool_t fMCcase)
 {
     // compile the class (locally)
     if(!fMCcase) gROOT->LoadMacro("AliAnalysisTaskXic.cxx++g");
-    else gROOT->LoadMacro('AliAnalysisTaskXicMC.cxx++g');
+    else gROOT->LoadMacro("AliAnalysisTaskXicMC.cxx++g");
 
     // Load macro for event selection
     gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
@@ -155,7 +156,7 @@ void LoadMacros(Bool_t fMCcase)
     // load the addtask macro
     gROOT->LoadMacro("AddXic.C");
     // create an instance of your analysis task
-    AliAnalysisTaskXic *task = AddXic();
+    AliAnalysisTaskXic *task = AddXic(name, AODdecision, MCdecision, CutListOption);
 
     // Load Create ESD chain macro
     //gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateESDChain.C");
