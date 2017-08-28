@@ -25,10 +25,7 @@ class AliAnalysisTaskXic : public AliAnalysisTaskSE
 {
     public:
                                 AliAnalysisTaskXic();
-                                AliAnalysisTaskXic(const char *name);
-                                AliAnalysisTaskXicMC();
-                                AliAnalysisTaskXicMC(const char *name, Bool_t AODdecision, Bool_t MCdecision, Int_t CutListOption=0);
-        virtual                 ~AliAnalysisTaskXicMC();
+                                AliAnalysisTaskXic(const char *name, Bool_t AODdecision, Bool_t MCdecision, Int_t CutListOption=0);
         virtual                 ~AliAnalysisTaskXic();
 
         virtual void            UserCreateOutputObjects();
