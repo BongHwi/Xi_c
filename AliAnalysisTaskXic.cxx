@@ -368,6 +368,9 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
   	return;
         }
       }else {
+        if(!AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler()) cout << "no MCtruthevent hanlder" <<endl;
+        if(static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent()) cout << "no MC event" << endl;
+        
         mcEvent = static_cast<AliMCEventHandler*>(AliAnalysisManager::GetAnalysisManager()->GetMCtruthEventHandler())->MCEvent();
         if (!mcEvent) {Printf("ERROR: Could not retrieve MC event"); return;}
       }
@@ -376,6 +379,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
     if(fAODcase){// AOD case
       cout<<"Currently AOD Case is not supported."<<endl;
     }else {// ESDs
+      cout << "ESD MODE" << endl;
       ((TH1F*)fOutputList->FindObject("fMultDistMC"))->Fill(fESD->GetNumberOfTracks());
       PrimaryVertexESD = fESD->GetPrimaryVertex();
       if(!PrimaryVertexESD) {cout<<"ERROR: Could not retrieve Vertex"<<endl; return;}
