@@ -396,8 +396,7 @@ void AliAnalysisTaskXic::UserExec(Option_t *)
         	  Error("UserExec", "Could not receive track %d", it);
         	  continue;
         	}
-        }
-
+        
         // Xi
       	if(mcInputTrack->GetPdgCode() == +kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXi1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
       	if(mcInputTrack->GetPdgCode() == -kXiCode) ((TH3F*)fOutputList->FindObject("fMCinputTotalXibar1"))->Fill(mcInputTrack->Pt(), mcInputTrack->Y(), mcInputTrack->GetCalcMass());
